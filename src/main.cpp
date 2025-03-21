@@ -29,6 +29,8 @@ void setup() {
     
 	Serial.begin(115200); // 初始化串口
 
+    // version 1
+
     // 初始化蜂鸣器
 	digitalWrite(BUZZER_PIN, LOW);
 
