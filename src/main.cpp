@@ -14,12 +14,24 @@ TaskHandle_t reader;
 TaskHandle_t executant;
 
 Robot_Monitor_t robot;
+
+
+void PWM_Sender() {
+    int delayTime = 50;
+    while(1) {
+        digitalWrite(9, HIGH);
+        delay(delayTime);
+        digitalWrite(9, LOW);
+        delay(delayTime);
+    }
+}
 void setup() {
     // 初始化引脚
 	Pin_Mode_Init();
     HAND_ALL_LOOSE(); // 松开所有电磁铁
     STEPPER_ALL_ON(); // 使能电机
 
+    PWM_Sender(); // 启动蜂鸣器
     // 初始化电机位置和加速度参数
     Stepper_Acc_Init();
     Stepper_Position_Init();
@@ -28,8 +40,6 @@ void setup() {
     robot.Init();
     
 	Serial.begin(115200); // 初始化串口
-
-    // version 1
 
     // 初始化蜂鸣器
 	digitalWrite(BUZZER_PIN, LOW);
@@ -48,7 +58,6 @@ void setup() {
 void loop() {
   // 主循环代码，重复执行
 }
-
 void Serial_Reader(void *pvParameters) {
     char c;
     int strcur = 0;

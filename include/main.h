@@ -17,6 +17,8 @@ void System_Relax();
 void System_Start();
 void System_Reset();
 
+void PWM_Sender();
+
 //void Stepper_Acc_Init();
 //void MotorSetAndPulse(int id, int dat);
 //void Pulse_Sender(int pin, int num);
