@@ -31,7 +31,6 @@ void setup() {
     HAND_ALL_LOOSE(); // 松开所有电磁铁
     STEPPER_ALL_ON(); // 使能电机
 
-    //PWM_Sender(); // 启动蜂鸣器
     // 初始化电机位置和加速度参数
     Stepper_Acc_Init();
     Stepper_Position_Init();
