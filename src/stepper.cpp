@@ -97,13 +97,14 @@ unsigned int numSteps = 0;
 const float dt = 0.00001;  // 10 微秒
 
 // 预先计算加速阶段中每个步进脉冲应触发的时间
-void generateSCurveStepTimes() {
+void generateSCurveStepTimes(int pulse_x, double T_mid) {
+    double v_max = 2 * pulse_x / T_mid;
     float t = 0.0;
     float lastStepPos = 0.0;
     numSteps = 0;
     
     // 当 t 超过加速时间或步数达到上限时停止计算
-    while(t <= T_accel && numSteps < MAX_STEPS) {
+    while(numSteps < MAX_STEPS && t < T_mid) {
         // 计算当前位移 x(t)
         // 使用 smoothstep 模型： x(t) = v_max * (t^3/T_accel^2 - t^4/(2*T_accel^3))
         float pos = v_max * ((t*t*t)/(T_accel*T_accel) - (t*t*t*t)/(2*T_accel*T_accel*T_accel));
@@ -120,7 +121,7 @@ void generateSCurveStepTimes() {
 
 // 初始化电机加速参数，包括频率和时间延迟
 void Stepper_Acc_Init() {
-
+    Stepper_Acc_Init_Old();
 }
 
 
