@@ -19,6 +19,8 @@
             delayMicroseconds(delta_time);\
         } while(0)
 
+#define MAX_STEPS 2003
+
 void Stepper_Control(int id, int op);
 void Stepper_Position_Init();
 void Stepper_Acc_Init();
