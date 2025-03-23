@@ -31,14 +31,20 @@ void setup() {
     HAND_ALL_LOOSE(); // 松开所有电磁铁
     STEPPER_ALL_ON(); // 使能电机
 
+    Serial.begin(115200); // 初始化串口
+
     // 初始化电机位置和加速度参数
     Stepper_Acc_Init();
-    Stepper_Position_Init();
+    robot.isReady = true;
+    Serial.println("Stepper Initialized");
+
+    Stepper_Control(1, 6);
+    //Stepper_Position_Init();
 
     // 初始化监视器
     robot.Init();
     
-	Serial.begin(115200); // 初始化串口
+	
 
     // 初始化蜂鸣器
 	digitalWrite(BUZZER_PIN, LOW);
@@ -51,6 +57,7 @@ void setup() {
 	delay(500);
 	xTaskCreatePinnedToCore(Instruction_Executant, "Instruction_Executant", 10000, NULL, 3, &executant, 1);
     delay(500);
+    robot.isReady = true;
 	Serial.println("{successfully initialized}");
 }
 
@@ -67,15 +74,16 @@ void Serial_Reader(void *pvParameters) {
         tmpstr[strcur++] = c;
         if (strcur == 8) {
             tmpstr[strcur] = '\0';
+            Serial.print("received: ");
             Serial.println(tmpstr);
             xQueueSend(instructions, tmpstr, 100); // 将指令发送到队列
             strcur = 0;
         }
         }
 
-        if (!digitalRead(BUTTOM_START_PIN)) System_Start(); // 检查开始按钮是否按下
-        if (!digitalRead(BUTTOM_RELAX_PIN)) System_Relax(); // 检查放松按钮是否按下
-        if (!digitalRead(BUTTOM_RESET_PIN)) System_Reset(); // 检查重置按钮
+        //if (!digitalRead(BUTTOM_START_PIN)) System_Start(); // 检查开始按钮是否按下
+        //if (!digitalRead(BUTTOM_RELAX_PIN)) System_Relax(); // 检查放松按钮是否按下
+        //if (!digitalRead(BUTTOM_RESET_PIN)) System_Reset(); // 检查重置按钮
 
         // if (!digitalRead(BtnRed)) Emergency_Stop();  // 检查紧急停止按钮
         // if (!digitalRead(BtnPrepare)) Motor_Prepare(); // 检查准备按钮

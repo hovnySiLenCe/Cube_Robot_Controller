@@ -45,7 +45,7 @@
 #define PULSE90 500   // 90度转动的脉冲数
 #define DELTA_PULSE 1    // 轻微转动的脉冲数
 
-#define Pulse_Acc 50
+#define ACC_PULSE 50
 #define Initial_Frequence 7200  // 初始频率
 #define End_Frequence 12000     // 结束频率
 
