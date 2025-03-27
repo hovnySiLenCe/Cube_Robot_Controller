@@ -30,25 +30,23 @@ void setup() {
 	Pin_Mode_Init();
     HAND_ALL_LOOSE(); // 松开所有电磁铁
     STEPPER_ALL_ON(); // 使能电机
+    // 初始化蜂鸣器
+    digitalWrite(BUZZER_PIN, LOW);
 
     Serial.begin(115200); // 初始化串口
 
     // 初始化电机位置和加速度参数
     Stepper_Acc_Init();
-    robot.isReady = true;
-    Serial.println("Stepper Initialized");
-
-    Stepper_Control(1, 6);
-    //Stepper_Position_Init();
-
     // 初始化监视器
     robot.Init();
     
-	
+    Serial.println("");
+    Serial.println("Stepper Initialized");
 
-    // 初始化蜂鸣器
-	digitalWrite(BUZZER_PIN, LOW);
-
+    //Stepper_Control(1, 6);
+    Stepper_Position_Init();
+    //robot.isReady = true;
+    
 	instructions = xQueueCreate(200, 9 * sizeof(char)); // 创建队列
 	if (instructions == NULL) {
 		Serial.println("{failed to create queue}");
@@ -57,7 +55,6 @@ void setup() {
 	delay(500);
 	xTaskCreatePinnedToCore(Instruction_Executant, "Instruction_Executant", 10000, NULL, 3, &executant, 1);
     delay(500);
-    robot.isReady = true;
 	Serial.println("{successfully initialized}");
 }
 
@@ -81,9 +78,9 @@ void Serial_Reader(void *pvParameters) {
         }
         }
 
-        //if (!digitalRead(BUTTOM_START_PIN)) System_Start(); // 检查开始按钮是否按下
-        //if (!digitalRead(BUTTOM_RELAX_PIN)) System_Relax(); // 检查放松按钮是否按下
-        //if (!digitalRead(BUTTOM_RESET_PIN)) System_Reset(); // 检查重置按钮
+        if (!digitalRead(BUTTOM_START_PIN)) System_Start(); // 检查开始按钮是否按下
+        if (!digitalRead(BUTTOM_RELAX_PIN)) System_Relax(); // 检查放松按钮是否按下
+        if (!digitalRead(BUTTOM_RESET_PIN)) System_Reset(); // 检查重置按钮
 
         // if (!digitalRead(BtnRed)) Emergency_Stop();  // 检查紧急停止按钮
         // if (!digitalRead(BtnPrepare)) Motor_Prepare(); // 检查准备按钮
@@ -101,24 +98,26 @@ void Instruction_Executant(void *pvParameters) {
         if (robot.isReady) {
             device_id = ins[1] - '0';  // 获取设备号
             operation = ins[3] - '0'; // 获取操作号
+            
+            Serial.print("operated: ");
+            if(device_id == 1 || device_id == 3) Serial.print("L");
+            else if(device_id == 2 || device_id == 4) Serial.print("R");
 
             switch (device_id) {
                 case 1: case 3: 
-                    if(device_id == 1) Serial.print("L");
-                    else Serial.print("R");
                     Serial.println(operation);
                     if (robot.l.isTight && robot.r.isTight && operation >= 5) robot.curTwist = true;
                     if (robot.preTwist && robot.curTwist) delay(Continous_Twist_Delay); // 连续拧动延迟
                     Stepper_Control(device_id, operation); // 控制电机转动
                 break;
                 case 2: case 4: 
+                    Serial.println(operation?"Open":"Close");
                     Hand_Control(device_id, operation); // 控制电磁铁开合
                 break;
                 case 0: case 7:
                     Serial.println("Ove");
                 break;
                 default: break;
-
             }
             robot.preTwist = robot.curTwist;
         }

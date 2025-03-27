@@ -21,9 +21,9 @@ void Stepper_Control(int id, int op) {
     case 5:
         digitalWrite(pin_dir, (*degree > 0 ? LOW : HIGH));
         Pulse_Sender(pin_pul, PULSE360);
-        *degree += 360;
+        *degree += (*degree > 0 ? -360 : 360);
         break;
-    case 6:
+    case 6: 
         digitalWrite(pin_dir, HIGH);
         Pulse_Sender(pin_pul, PULSE90);
         *degree += 90;
@@ -36,7 +36,7 @@ void Stepper_Control(int id, int op) {
     case 8:
         digitalWrite(pin_dir, (*degree > 0 ? LOW : HIGH));
         Pulse_Sender(pin_pul, PULSE180);
-        *degree += 180 * (*degree > 0 ? -1 : 1);
+        *degree += (*degree > 0 ? -180 : 180);
         break;
     default:
         return;
@@ -52,21 +52,26 @@ void Stepper_Position_Init() {
     digitalWrite(STEPPER_L_DIR, LOW);
 
     while (!digitalRead(SENSOR_L_PIN)) {
-        Pulse_Sender(STEPPER_L_PUL, 1);
+        PULSE_GENERATOR(STEPPER_L_PUL, STEPPER_REVERSE_DELAY);
+        //Pulse_Sender(STEPPER_L_PUL, 1);
         //delay(ReverseSpeed);
     }
     Pulse_Sender(STEPPER_L_PUL, stepperLcorrection);
+    Pulse_Sender(STEPPER_L_PUL, PULSE360/8);
+
     // stepperLcorrection 是微调参数
     digitalWrite(STEPPER_R_DIR, LOW);
-    Pulse_Sender(STEPPER_R_PUL, PULSE360 / 8);
+    Pulse_Sender(STEPPER_R_PUL, PULSE360/8);
     digitalWrite(STEPPER_R_DIR, HIGH);
-
     while (!digitalRead(SENSOR_R_PIN)) {
-        Pulse_Sender(STEPPER_R_PUL, 1);
+        PULSE_GENERATOR(STEPPER_R_PUL, STEPPER_REVERSE_DELAY);
+        //Pulse_Sender(STEPPER_R_PUL, 1);
         //delay(ReverseSpeed);
     }
 
     Pulse_Sender(STEPPER_R_PUL, stepperRcorrection);
+    Pulse_Sender(STEPPER_L_PUL, PULSE360/8);
+
     robot.isReady = true;
     return;
 }
@@ -78,20 +83,23 @@ void Stepper_Position_Init() {
 // 每跨过 1 步，则产生一个脉冲
 
 
+// double acc_frenquence[MAX_STEPS];
+// int time_delay[MAX_STEPS];
+// int DriveTimeDelay[MAX_STEPS];
+// int TwistTimeDelay[MAX_STEPS];
+// int RaceTimeDelay[MAX_STEPS];
 
-double acc_frenquence[MAX_STEPS];
-int time_delay[MAX_STEPS];
-int DriveTimeDelay[MAX_STEPS];
-int TwistTimeDelay[MAX_STEPS];
-int RaceTimeDelay[MAX_STEPS];
-
-// 预先计算加速阶段中每个步进脉冲应触发的时间
+#define MAX_DELAY_SEQUENCE 4
+#define RACE_ID 0
+#define TURN_ID 1
+#define TWIST_ID 2
+#define DEBUG_ID 3
 
 // 用来存储预计算的脉冲触发时刻（单位：微秒）
-double stepTimes[4][MAX_STEPS];
-int numSteps[4];
+double stepTimes[MAX_DELAY_SEQUENCE][MAX_STEPS];
+int numSteps[MAX_DELAY_SEQUENCE];
 // 模拟连续时间，步长 dt（秒）；dt 越小，采样越精细
-const double dt = 0.000001;
+const double dt = 0.0000001;
 void generateSCurveStepTimes(double *stepTimes, int& numSteps, int pulse_x, double T_mid)
 {
     double v_max = 2 * pulse_x / T_mid;
@@ -118,9 +126,10 @@ void generateSCurveStepTimes(double *stepTimes, int& numSteps, int pulse_x, doub
     Serial.println(numSteps);
 }
 void Stepper_Acc_Init() {
-    generateSCurveStepTimes(stepTimes[0], numSteps[0], ACC_PULSE, 0.01 / 2);
-    generateSCurveStepTimes(stepTimes[1], numSteps[1], ACC_PULSE, 0.1 / 2);
-    generateSCurveStepTimes(stepTimes[2], numSteps[2], ACC_PULSE, 0.1 / 2);
+    generateSCurveStepTimes(stepTimes[RACE_ID], numSteps[RACE_ID], ACC_PULSE_OF_RACE, 0.01 / 2);
+    generateSCurveStepTimes(stepTimes[TURN_ID], numSteps[TURN_ID], ACC_PULSE_OF_TURN, 0.05 / 2);
+    generateSCurveStepTimes(stepTimes[TWIST_ID], numSteps[TWIST_ID], ACC_PULSE_OF_TWIST, 0.03 / 2);
+    generateSCurveStepTimes(stepTimes[DEBUG_ID], numSteps[DEBUG_ID], ACC_PULSE_OF_DEBUG, 0.08 / 2);
     //Stepper_Acc_Init_Old();
 }
 
@@ -156,15 +165,18 @@ void Stepper_Acc_Init() {
 // }
 
 void Pulse_Sender(int pin, int num) {
-    if (num >= 2 * ACC_PULSE) 
-    {
-        Serial.println("Pulse_Sender:");
-        Serial.println(" num >= 2 * ACC_PULSE");
-        int id = (pin == STEPPER_L_PUL) ? robot.l.isTight*((int)robot.r.isTight + 1) : robot.r.isTight * ((int)robot.l.isTight + 1);
-        
-        Serial.println("id");
-        Serial.println(id);
 
+    int id = (pin == STEPPER_L_PUL) ? robot.l.isTight*((int)robot.r.isTight + 1) : robot.r.isTight * ((int)robot.l.isTight + 1);
+    int accPulse = numSteps[id];
+
+    if (num >= 2 * accPulse) 
+    {
+        for (int i = 0; i < accPulse; i++)
+            PULSE_GENERATOR(pin, stepTimes[id][i]);
+        for (int i = 0; i < num - 2 * accPulse; i++)
+            PULSE_GENERATOR(pin, stepTimes[id][accPulse-1]);
+        for (int i = accPulse-1; i >= 0; i--)
+            PULSE_GENERATOR(pin, stepTimes[id][i]);
         // if (pin == STEPPER_L_PUL)
         // {
         //     if (robot.l.isTight == 0) // 左爪空转
@@ -187,16 +199,9 @@ void Pulse_Sender(int pin, int num) {
         //     else
         //         ChosenMode = time_delay;
         // }
-
-        for (int i = 0; i < ACC_PULSE; i++)
-            PULSE_GENERATOR(pin, stepTimes[id][i]);
-        for (int i = 1; i <= num - 2 * ACC_PULSE; i++)
-            PULSE_GENERATOR(pin, stepTimes[id][ACC_PULSE-1]);
-        for (int i = ACC_PULSE-1; i >= 0; i--)
-            PULSE_GENERATOR(pin, stepTimes[id][i]);
     }
     else {
         for (int i = 1; i <= num; i++)
-            PULSE_GENERATOR(pin, SlightDelay);
+            PULSE_GENERATOR(pin, STEPPER_DEBUG_DELAY);
     }
 }
