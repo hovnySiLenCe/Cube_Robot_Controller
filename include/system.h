@@ -18,7 +18,7 @@
 
 // 电磁铁引脚
 #define MAGNET_L_PIN 9
-#define MAGNET_R_PIN 10
+#define MAGNET_R_PIN 11
 
 // 按钮引脚
 #define BUTTOM_START_PIN 21
@@ -47,12 +47,12 @@
 #define Magnet_Delta_Delay 5
 #define Continous_Twist_Delay 10 // 连续拧动的延迟，单位ms
 
-#define STEPPER_REVERSE_DELAY 10000 // 初始位置延迟，单位us
+#define STEPPER_REVERSE_DELAY 5000 // 初始位置延迟，单位us
 #define STEPPER_DEBUG_DELAY 5000 // 轻微延迟，单位us
 
 // ----------- 脉冲数设置 -----------
 // 补偿脉冲
-#define stepperLcorrection 12
+#define stepperLcorrection 0
 #define stepperRcorrection 0
 
 #define PULSE360 2000 // 360度转动的脉冲数
@@ -91,11 +91,12 @@ typedef struct {
 typedef struct {
     Hand_State_t l;
     Hand_State_t r;
-    bool isReady, preTwist, curTwist;
+    bool isReady, isDebug, preTwist, curTwist;
     void Init() {
         l.isTight = r.isTight = false;
         l.degree = r.degree = 0;
-        isReady = preTwist = curTwist = false;
+        isReady = isDebug = false;
+        preTwist = curTwist = false;
     }
 }Robot_Monitor_t;
 

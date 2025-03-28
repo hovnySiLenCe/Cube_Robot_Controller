@@ -46,32 +46,33 @@ void Stepper_Control(int id, int op) {
 }
 
 void Stepper_Position_Init() {
+    Serial.println("Stepper_Position_Initialzing");
     // 校正电机方向
-    digitalWrite(STEPPER_L_DIR, HIGH);
-    Pulse_Sender(STEPPER_L_PUL, PULSE360 / 8);
     digitalWrite(STEPPER_L_DIR, LOW);
+    //Pulse_Sender(STEPPER_L_PUL, PULSE360 / 8);
+    //digitalWrite(STEPPER_L_DIR, LOW);
+    //delay(500);
 
-    while (!digitalRead(SENSOR_L_PIN)) {
+    while (digitalRead(SENSOR_L_PIN)) {
         PULSE_GENERATOR(STEPPER_L_PUL, STEPPER_REVERSE_DELAY);
-        //Pulse_Sender(STEPPER_L_PUL, 1);
-        //delay(ReverseSpeed);
     }
-    Pulse_Sender(STEPPER_L_PUL, stepperLcorrection);
-    Pulse_Sender(STEPPER_L_PUL, PULSE360/8);
+    //digitalWrite(STEPPER_L_DIR, LOW);
+    //Pulse_Sender(STEPPER_L_PUL, stepperLcorrection);
+    //Pulse_Sender(STEPPER_L_PUL, PULSE360/8);
+    Serial.println("L_Stepper_Initialized");
 
     // stepperLcorrection 是微调参数
     digitalWrite(STEPPER_R_DIR, LOW);
-    Pulse_Sender(STEPPER_R_PUL, PULSE360/8);
-    digitalWrite(STEPPER_R_DIR, HIGH);
-    while (!digitalRead(SENSOR_R_PIN)) {
+    //Pulse_Sender(STEPPER_R_PUL, PULSE360/8);
+    while (digitalRead(SENSOR_R_PIN)) {
         PULSE_GENERATOR(STEPPER_R_PUL, STEPPER_REVERSE_DELAY);
         //Pulse_Sender(STEPPER_R_PUL, 1);
         //delay(ReverseSpeed);
     }
-
-    Pulse_Sender(STEPPER_R_PUL, stepperRcorrection);
-    Pulse_Sender(STEPPER_L_PUL, PULSE360/8);
-
+    //digitalWrite(STEPPER_R_DIR, LOW);
+    //Pulse_Sender(STEPPER_R_PUL, stepperRcorrection);
+    //Pulse_Sender(STEPPER_R_PUL, PULSE360/8);
+    Serial.println("R_Stepper_Initialized");
     robot.isReady = true;
     return;
 }
@@ -95,17 +96,27 @@ void Stepper_Position_Init() {
 #define TWIST_ID 2
 #define DEBUG_ID 3
 
-// 用来存储预计算的脉冲触发时刻（单位：微秒）
-double stepTimes[MAX_DELAY_SEQUENCE][MAX_STEPS];
-int numSteps[MAX_DELAY_SEQUENCE];
+
+// 定义用来存储S型曲线的结构体
+struct Acc_Array_t {
+    int accPulse, T_mid;
+    int stepTimes[MAX_STEPS];
+    bool operator==(const Acc_Array_t& x) const {
+        return accPulse == x.accPulse && T_mid == x.T_mid;
+    }
+}accArrays[MAX_DELAY_SEQUENCE];
+
 // 模拟连续时间，步长 dt（秒）；dt 越小，采样越精细
-const double dt = 0.0000001;
-void generateSCurveStepTimes(double *stepTimes, int& numSteps, int pulse_x, double T_mid)
+const double dt = 0.000001;
+void generateSCurveStepTimes(Acc_Array_t* acc_p, int pulse_x, double T_mid)
 {
     double v_max = 2 * pulse_x / T_mid;
-    double t = 0.0, lastT = 0;
+    double t = 0.0, lastT = 0.0;
     double lastStepPos = 0.0, pos;
-    numSteps = 0;
+    int numSteps = 0;
+
+    acc_p->T_mid = T_mid*1e6; // 单位为微秒
+    acc_p->accPulse = pulse_x;
 
     // 当 t 超过加速时间或步数达到上限时停止计算
     while (numSteps < pulse_x)
@@ -116,89 +127,47 @@ void generateSCurveStepTimes(double *stepTimes, int& numSteps, int pulse_x, doub
 
         // 当累计位移跨过下一个整数（即步数）时，记录该时刻
         if (floor(pos) > lastStepPos) {
-            stepTimes[numSteps++] = ((t-lastT) * 1000000.0); // 转换为微秒
-            Serial.println(stepTimes[numSteps-1]);
+            acc_p->stepTimes[numSteps++] = ((t-lastT) * 1000000.0 / 2); // 转换为微秒
             lastStepPos = floor(pos);
             lastT = t;
         }
         t += dt;
     }
-    Serial.println(numSteps);
 }
+
+Preferences prefs; // 用于将数据存储在本地Flash中
 void Stepper_Acc_Init() {
-    generateSCurveStepTimes(stepTimes[RACE_ID], numSteps[RACE_ID], ACC_PULSE_OF_RACE, 0.01 / 2);
-    generateSCurveStepTimes(stepTimes[TURN_ID], numSteps[TURN_ID], ACC_PULSE_OF_TURN, 0.05 / 2);
-    generateSCurveStepTimes(stepTimes[TWIST_ID], numSteps[TWIST_ID], ACC_PULSE_OF_TWIST, 0.03 / 2);
-    generateSCurveStepTimes(stepTimes[DEBUG_ID], numSteps[DEBUG_ID], ACC_PULSE_OF_DEBUG, 0.08 / 2);
-    //Stepper_Acc_Init_Old();
+    prefs.begin("stepper", false);
+    if (prefs.isKey("accArray")) {
+        prefs.getBytes("accArray", &accArrays, sizeof(accArrays));
+        Serial.println("Loaded accArrays from flash");
+        return;
+    }
+
+    generateSCurveStepTimes(&accArrays[RACE_ID], ACC_PULSE_OF_RACE, 0.01 / 2);
+    generateSCurveStepTimes(&accArrays[TURN_ID], ACC_PULSE_OF_TURN, 0.05 / 2);
+    generateSCurveStepTimes(&accArrays[TWIST_ID], ACC_PULSE_OF_TWIST, 0.03 / 2);
+    generateSCurveStepTimes(&accArrays[DEBUG_ID], ACC_PULSE_OF_DEBUG, 0.08 / 2);
+    
+    prefs.putBytes("accArray", &accArrays, sizeof(accArrays));
+    Serial.println("Saved accArrays to flash");
 }
-
-
-// 初始化电机加速参数，包括频率和时间延迟
-// void Stepper_Acc_Init_Old() {
-//     int num = ACC_PULSE / 2; // 计算加速曲线的中点
-//     // 延时
-//     for (int i = 1; i <= ACC_PULSE; i++)
-//     {
-//         acc_frenquence[i] = Initial_Frequence + (double)(End_Frequence - Initial_Frequence) / (double)(1.0 + exp(((double)acc_factor * (num - i) / num)));
-//         time_delay[i] = round((1000000 / acc_frenquence[i]) / 2.0);
-//     }
-//     // 驱动
-//     for (int i = 1; i <= ACC_PULSE; i++)
-//     {
-//         acc_frenquence[i] = DriveIniFreq + (double)(DriveEndFreq - DriveIniFreq) / (double)(1.0 + exp(((double)acc_factor * (num - i) / num)));
-//         DriveTimeDelay[i] = round((1000000 / acc_frenquence[i]) / 2.0);
-//     }
-//     // 拧动
-//     for (int i = 1; i <= ACC_PULSE; i++)
-//     {
-//         acc_frenquence[i] = TwistIniFreq + (double)(TwistEndFreq - TwistIniFreq) / (double)(1.0 + exp(((double)acc_factor * (num - i) / num)));
-//         TwistTimeDelay[i] = round((1000000 / acc_frenquence[i]) / 2.0);
-//     }
-//     // 空转
-//     for (int i = 1; i <= ACC_PULSE; i++)
-//     {
-//         acc_frenquence[i] = RaceIniFreq + (double)(RaceEndFreq - DriveIniFreq) / (double)(1.0 + exp(((double)acc_factor * (num - i) / num)));
-//         RaceTimeDelay[i] = round((1000000 / acc_frenquence[i]) / 2.0);
-//     }
-//     return;
-// }
 
 void Pulse_Sender(int pin, int num) {
 
     int id = (pin == STEPPER_L_PUL) ? robot.l.isTight*((int)robot.r.isTight + 1) : robot.r.isTight * ((int)robot.l.isTight + 1);
-    int accPulse = numSteps[id];
+    
+    int accPulse = accArrays[id].accPulse;
+    int* stepTimes = accArrays[id].stepTimes;
 
-    if (num >= 2 * accPulse) 
+    if (robot.isReady && num >= 2 * accPulse) 
     {
         for (int i = 0; i < accPulse; i++)
-            PULSE_GENERATOR(pin, stepTimes[id][i]);
+            PULSE_GENERATOR(pin, stepTimes[i]);
         for (int i = 0; i < num - 2 * accPulse; i++)
-            PULSE_GENERATOR(pin, stepTimes[id][accPulse-1]);
+            PULSE_GENERATOR(pin, stepTimes[accPulse-1]);
         for (int i = accPulse-1; i >= 0; i--)
-            PULSE_GENERATOR(pin, stepTimes[id][i]);
-        // if (pin == STEPPER_L_PUL)
-        // {
-        //     if (robot.l.isTight == 0) // 左爪空转
-        //         ChosenMode = RaceTimeDelay;
-        //     else if (robot.r.isTight == 1) // 拧动
-        //         ChosenMode = TwistTimeDelay;
-        //     else if (robot.r.isTight == 0) // 带转动
-        //         ChosenMode = DriveTimeDelay;
-        //     else
-        //         ChosenMode = time_delay;
-        // }
-        // else
-        // {
-        //     if (robot.r.isTight == 0)
-        //         ChosenMode = RaceTimeDelay;
-        //     else if (robot.l.isTight == 1)
-        //         ChosenMode = TwistTimeDelay;
-        //     else if (robot.l.isTight == 0)
-        //         ChosenMode = DriveTimeDelay;
-        //     else
-        //         ChosenMode = time_delay;
-        // }
+            PULSE_GENERATOR(pin, stepTimes[i]);
     }
     else {
         for (int i = 1; i <= num; i++)

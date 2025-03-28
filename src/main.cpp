@@ -26,6 +26,7 @@ void PWM_Sender() {
     }
 }
 void setup() {
+    esp_log_level_set("esp_system", ESP_LOG_NONE);
     // 初始化引脚
 	Pin_Mode_Init();
     HAND_ALL_LOOSE(); // 松开所有电磁铁
@@ -33,19 +34,10 @@ void setup() {
     // 初始化蜂鸣器
     digitalWrite(BUZZER_PIN, LOW);
 
-    Serial.begin(115200); // 初始化串口
-
-    // 初始化电机位置和加速度参数
-    Stepper_Acc_Init();
-    // 初始化监视器
+    Serial.begin(9600);
     robot.Init();
-    
-    Serial.println("");
-    Serial.println("Stepper Initialized");
-
-    //Stepper_Control(1, 6);
-    Stepper_Position_Init();
-    //robot.isReady = true;
+    Stepper_Acc_Init();
+    Serial.println("{acc parameters initialized}");
     
 	instructions = xQueueCreate(200, 9 * sizeof(char)); // 创建队列
 	if (instructions == NULL) {
@@ -55,6 +47,10 @@ void setup() {
 	delay(500);
 	xTaskCreatePinnedToCore(Instruction_Executant, "Instruction_Executant", 10000, NULL, 3, &executant, 1);
     delay(500);
+
+    Stepper_Position_Init();
+    Serial.println("{stepper position initialized}");
+    
 	Serial.println("{successfully initialized}");
 }
 
@@ -90,31 +86,30 @@ void Serial_Reader(void *pvParameters) {
 }
 
 void Instruction_Executant(void *pvParameters) {
-    char ins[8];
-    int device_id, operation;
+    char ins[8], device_id, operation;
     while (true) {
         if (xQueueIsQueueEmptyFromISR(instructions) == pdFALSE) {
         xQueueReceive(instructions, ins, 100);
         if (robot.isReady) {
-            device_id = ins[1] - '0';  // 获取设备号
-            operation = ins[3] - '0'; // 获取操作号
+            device_id = ins[1];  // 获取设备号
+            operation = ins[3]; // 获取操作号
             
             Serial.print("operated: ");
-            if(device_id == 1 || device_id == 3) Serial.print("L");
-            else if(device_id == 2 || device_id == 4) Serial.print("R");
+            if(device_id == '1' || device_id == '3') Serial.print("L");
+            else if(device_id == '2' || device_id == '4') Serial.print("R");
 
             switch (device_id) {
-                case 1: case 3: 
+                case '1': case '3': 
                     Serial.println(operation);
-                    if (robot.l.isTight && robot.r.isTight && operation >= 5) robot.curTwist = true;
+                    if (robot.l.isTight && robot.r.isTight && operation >= '5') robot.curTwist = true;
                     if (robot.preTwist && robot.curTwist) delay(Continous_Twist_Delay); // 连续拧动延迟
                     Stepper_Control(device_id, operation); // 控制电机转动
                 break;
-                case 2: case 4: 
+                case '2': case '4': 
                     Serial.println(operation?"Open":"Close");
                     Hand_Control(device_id, operation); // 控制电磁铁开合
                 break;
-                case 0: case 7:
+                case '0': case '7':
                     Serial.println("Ove");
                 break;
                 default: break;
