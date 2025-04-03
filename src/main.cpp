@@ -26,7 +26,8 @@ void PWM_Sender() {
     }
 }
 void setup() {
-    esp_log_level_set("esp_system", ESP_LOG_NONE);
+    esp_log_level_set("*", ESP_LOG_NONE);
+    //esp_log_level_set("esp_system", ESP_LOG_NONE);
     // 初始化引脚
 	Pin_Mode_Init();
     HAND_ALL_LOOSE(); // 松开所有电磁铁
@@ -34,7 +35,8 @@ void setup() {
     // 初始化蜂鸣器
     digitalWrite(BUZZER_PIN, LOW);
 
-    Serial.begin(9600);
+    Serial.begin(115200);
+    Serial.println("");
     robot.Init();
     Stepper_Acc_Init();
     Serial.println("{acc parameters initialized}");
@@ -48,10 +50,12 @@ void setup() {
 	xTaskCreatePinnedToCore(Instruction_Executant, "Instruction_Executant", 10000, NULL, 3, &executant, 1);
     delay(500);
 
+    
+
     Stepper_Position_Init();
     Serial.println("{stepper position initialized}");
     
-	Serial.println("{successfully initialized}");
+	Serial.println("---------- successfully initialized ----------");
 }
 
 void loop() {

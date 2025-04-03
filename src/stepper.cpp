@@ -46,7 +46,7 @@ void Stepper_Control(int id, int op) {
 }
 
 void Stepper_Position_Init() {
-    Serial.println("Stepper_Position_Initialzing");
+    Serial.println("---------- Stepper_Position_Initialze_Start ----------");
     // 校正电机方向
     digitalWrite(STEPPER_L_DIR, LOW);
     //Pulse_Sender(STEPPER_L_PUL, PULSE360 / 8);
@@ -101,6 +101,8 @@ void Stepper_Position_Init() {
 struct Acc_Array_t {
     int accPulse, T_mid;
     int stepTimes[MAX_STEPS];
+    Acc_Array_t(int pulse_x, int T_mid) : accPulse(pulse_x), T_mid(T_mid) { memset(stepTimes, 0, sizeof(stepTimes)); } // 构造函数初始化
+    Acc_Array_t() {}
     bool operator==(const Acc_Array_t& x) const {
         return accPulse == x.accPulse && T_mid == x.T_mid;
     }
@@ -108,8 +110,9 @@ struct Acc_Array_t {
 
 // 模拟连续时间，步长 dt（秒）；dt 越小，采样越精细
 const double dt = 0.000001;
-void generateSCurveStepTimes(Acc_Array_t* acc_p, int pulse_x, double T_mid)
+bool generateSCurveStepTimes(Acc_Array_t* acc_p, int pulse_x, double T_mid)
 {
+    if(*acc_p == Acc_Array_t(pulse_x, T_mid)) return true; // 如果数据相同，则不重新计算
     double v_max = 2 * pulse_x / T_mid;
     double t = 0.0, lastT = 0.0;
     double lastStepPos = 0.0, pos;
@@ -133,23 +136,33 @@ void generateSCurveStepTimes(Acc_Array_t* acc_p, int pulse_x, double T_mid)
         }
         t += dt;
     }
+    return false; // 返回 false 表示数据已更新
 }
 
 Preferences prefs; // 用于将数据存储在本地Flash中
 void Stepper_Acc_Init() {
-    prefs.begin("stepper", false);
-    if (prefs.isKey("accArray")) {
-        prefs.getBytes("accArray", &accArrays, sizeof(accArrays));
+    Serial.println("---------- Stepper_Acc_Initialze_Start -----------");
+    if(!prefs.begin("stepper", false)) {
+        Serial.println("Failed to initialize preferences");
+        return;
+    }
+    if (prefs.isKey("accArrays")) {
+        prefs.getBytes("accArrays", &accArrays, sizeof(accArrays));
         Serial.println("Loaded accArrays from flash");
         return;
     }
-
-    generateSCurveStepTimes(&accArrays[RACE_ID], ACC_PULSE_OF_RACE, 0.01 / 2);
-    generateSCurveStepTimes(&accArrays[TURN_ID], ACC_PULSE_OF_TURN, 0.05 / 2);
-    generateSCurveStepTimes(&accArrays[TWIST_ID], ACC_PULSE_OF_TWIST, 0.03 / 2);
-    generateSCurveStepTimes(&accArrays[DEBUG_ID], ACC_PULSE_OF_DEBUG, 0.08 / 2);
+    bool isSame = true;
+    isSame &= generateSCurveStepTimes(&accArrays[RACE_ID], ACC_PULSE_OF_RACE, 0.01 / 2);
+    isSame &= generateSCurveStepTimes(&accArrays[TURN_ID], ACC_PULSE_OF_TURN, 0.05 / 2);
+    isSame &= generateSCurveStepTimes(&accArrays[TWIST_ID], ACC_PULSE_OF_TWIST, 0.03 / 2);
+    isSame &= generateSCurveStepTimes(&accArrays[DEBUG_ID], ACC_PULSE_OF_DEBUG, 0.08 / 2);
     
-    prefs.putBytes("accArray", &accArrays, sizeof(accArrays));
+    if(isSame) {
+        Serial.println("No need to update accArrays");
+        return;
+    }
+
+    prefs.putBytes("accArrays", &accArrays, sizeof(accArrays));
     Serial.println("Saved accArrays to flash");
 }
 
