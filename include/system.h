@@ -2,6 +2,7 @@
 #define _SYSTEM_H_
 
 #include <Arduino.h>
+#include <Preferences.h>
 
 // ########## 引脚定义 #########
 // 左电机引脚
@@ -101,5 +102,6 @@ typedef struct {
 }Robot_Monitor_t;
 
 extern Robot_Monitor_t robot;
+extern Preferences prefs;
 
 #endif

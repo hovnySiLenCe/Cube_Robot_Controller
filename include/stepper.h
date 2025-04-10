@@ -2,7 +2,6 @@
 #define _STEPPER_H_
 
 #include "system.h"
-#include <Preferences.h>
 
 #define L_STEPPER_ON() digitalWrite(STEPPER_L_ENA,LOW)
 #define L_STEPPER_OFF() digitalWrite(STEPPER_L_ENA,HIGH)

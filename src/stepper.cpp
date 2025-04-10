@@ -139,7 +139,7 @@ bool generateSCurveStepTimes(Acc_Array_t* acc_p, int pulse_x, double T_mid)
     return false; // 返回 false 表示数据已更新
 }
 
-Preferences prefs; // 用于将数据存储在本地Flash中
+Preferences prefs; // 用于存储数据的对象
 void Stepper_Acc_Init() {
     Serial.println("---------- Stepper_Acc_Initialze_Start -----------");
     if(!prefs.begin("stepper", false)) {
