@@ -1,4 +1,5 @@
 #include "main.h"
+#include <Preferences.h>
 
 /* 作者: LiBingle
  * 第二作者: Joshua
@@ -14,7 +15,6 @@ TaskHandle_t reader;
 TaskHandle_t executant;
 
 Robot_Monitor_t robot;
-
 
 void PWM_Sender() {
     int delayTime = 50;
@@ -35,9 +35,12 @@ void setup() {
     // 初始化蜂鸣器
     digitalWrite(BUZZER_PIN, LOW);
 
-    Serial.begin(115200);
+    Serial.begin(9600);
     Serial.println("");
     robot.Init();
+    Data_Sheet_Init();
+    Serial.println("{data sheet initialized}");
+
     Stepper_Acc_Init();
     Serial.println("{acc parameters initialized}");
     
@@ -69,7 +72,7 @@ void Serial_Reader(void *pvParameters) {
     while (true) {
         while (Serial.available() && ((c = Serial.read()) == '#' || strcur != 0)) {
         tmpstr[strcur++] = c;
-        if (strcur == 8) {
+        if (c == '\n' || c== '\r' || strcur == 8) {
             tmpstr[strcur] = '\0';
             Serial.print("received: ");
             Serial.println(tmpstr);
@@ -89,8 +92,18 @@ void Serial_Reader(void *pvParameters) {
     }
 }
 
+int String2Int(char *str) {
+    int result = 0;
+    while(*str && *str != '\n' && *str != '\r') {
+        result = result * 10 + (*str - '0');
+        str++;
+    }
+    return result;
+}
+
 void Instruction_Executant(void *pvParameters) {
     char ins[8], device_id, operation;
+    int value;
     while (true) {
         if (xQueueIsQueueEmptyFromISR(instructions) == pdFALSE) {
         xQueueReceive(instructions, ins, 100);
@@ -116,6 +129,15 @@ void Instruction_Executant(void *pvParameters) {
                 case '0': case '7':
                     Serial.println("Ove");
                 break;
+                case 'R':
+                    Data_Sheet_Read();
+                break;
+                case 'W':
+                    Data_Sheet_Modify(String2Int(ins + 2));
+                break;
+                case 'E':
+                    Data_Sheet_Save();
+                break;
                 default: break;
             }
             robot.preTwist = robot.curTwist;
@@ -125,7 +147,6 @@ void Instruction_Executant(void *pvParameters) {
 }
 
 // -------- 按钮相关函数 --------
-
 // 系统放松
 void System_Relax()
 {
