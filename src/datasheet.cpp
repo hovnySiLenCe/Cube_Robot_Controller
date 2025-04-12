@@ -18,9 +18,9 @@ void Data_Sheet_Init() {
 
 void Data_Sheet_Read() {
     for (int i = 0; i < MAX_KEY_NUM; i++) {
-        Serial.printf("key[%d]: %d\n", i, dsheet.key[i]);
+        Serial.printf("#DS%02d%04d\n", i, dsheet.key[i]);
     }
-    Serial.println("Data_Sheet Read Successfully");
+    Serial.println("#DSEND");
 }
 
 void Data_Sheet_Modify(int operation) {

@@ -127,7 +127,7 @@ void Instruction_Executant(void *pvParameters) {
                     Hand_Control(device_id, operation); // 控制电磁铁开合
                 break;
                 case '0': case '7':
-                    Serial.println("Ove");
+                    Serial.println("#Over");
                 break;
                 case 'R':
                     Data_Sheet_Read();
@@ -156,7 +156,7 @@ void System_Relax()
         STEPPER_ALL_OFF();
         HAND_ALL_LOOSE();
         robot.Init();
-        Serial.println("System_Relax");
+        Serial.println("#Relax");
         while (true)
         {
             if (digitalRead(BUTTOM_RELAX_PIN))
@@ -171,7 +171,7 @@ void System_Start()
     delay(10);
     if (!digitalRead(BUTTOM_START_PIN))
     {
-        Serial.println("Sta");
+        Serial.println("#Start");
         while (true)
         {
             if (digitalRead(BUTTOM_START_PIN))
@@ -184,7 +184,7 @@ void System_Start()
 void System_Reset() {
     delay(10);
     if (!digitalRead(BUTTOM_RESET_PIN)) {
-        Serial.println("System_Reset");
+        Serial.println("#Reset");
         HAND_ALL_LOOSE();
         if (robot.l.degree % 180 != 0) {
             digitalWrite(STEPPER_L_DIR, (robot.l.degree > 0 ? LOW : HIGH));
