@@ -9,6 +9,8 @@
 // 8: 180度
 void Stepper_Control(int id, int op) {
 
+    Serial.printf("id = %d op = %d\n", id, op);
+
     int pin_dir = (id == 1 ? STEPPER_L_DIR : STEPPER_R_DIR);
     int pin_pul = (id == 1 ? STEPPER_L_PUL : STEPPER_R_PUL);
     int *degree = (id == 1 ? &robot.l.degree : &robot.r.degree);
@@ -24,11 +26,13 @@ void Stepper_Control(int id, int op) {
         *degree += (*degree > 0 ? -360 : 360);
         break;
     case 6: 
+        Serial.println("---------- 90 degree ----------");
         digitalWrite(pin_dir, HIGH);
         Pulse_Sender(pin_pul, PULSE90);
         *degree += 90;
         break;
     case 7:
+        Serial.println("---------- -90 degree ----------");
         digitalWrite(pin_dir, LOW);
         Pulse_Sender(pin_pul, PULSE90);
         *degree -= 90;
@@ -45,10 +49,13 @@ void Stepper_Control(int id, int op) {
     // Serial.println(robot.r.degree);
 }
 
+#define CW HIGH
+#define ACW LOW
+
 void Stepper_Position_Init() {
     Serial.println("---------- Stepper_Position_Initialze_Start ----------");
     // 校正电机方向
-    digitalWrite(STEPPER_L_DIR, LOW);
+    digitalWrite(STEPPER_L_DIR, ACW);
     //Pulse_Sender(STEPPER_L_PUL, PULSE360 / 8);
     //digitalWrite(STEPPER_L_DIR, LOW);
     //delay(500);
@@ -56,22 +63,20 @@ void Stepper_Position_Init() {
     while (digitalRead(SENSOR_L_PIN)) {
         PULSE_GENERATOR(STEPPER_L_PUL, STEPPER_REVERSE_DELAY);
     }
-    //digitalWrite(STEPPER_L_DIR, LOW);
-    //Pulse_Sender(STEPPER_L_PUL, stepperLcorrection);
-    //Pulse_Sender(STEPPER_L_PUL, PULSE360/8);
+    digitalWrite(STEPPER_L_DIR, CW);
+    Pulse_Sender(STEPPER_L_PUL, PULSE360/8-stepperLcorrection);
     Serial.println("L_Stepper_Initialized");
 
     // stepperLcorrection 是微调参数
-    digitalWrite(STEPPER_R_DIR, LOW);
+    digitalWrite(STEPPER_R_DIR, ACW);
     //Pulse_Sender(STEPPER_R_PUL, PULSE360/8);
     while (digitalRead(SENSOR_R_PIN)) {
         PULSE_GENERATOR(STEPPER_R_PUL, STEPPER_REVERSE_DELAY);
         //Pulse_Sender(STEPPER_R_PUL, 1);
         //delay(ReverseSpeed);
     }
-    //digitalWrite(STEPPER_R_DIR, LOW);
-    //Pulse_Sender(STEPPER_R_PUL, stepperRcorrection);
-    //Pulse_Sender(STEPPER_R_PUL, PULSE360/8);
+    digitalWrite(STEPPER_R_DIR, CW);
+    Pulse_Sender(STEPPER_R_PUL, PULSE360/8-stepperRcorrection);
     Serial.println("R_Stepper_Initialized");
     robot.isReady = true;
     return;
@@ -144,6 +149,11 @@ void Stepper_Acc_Init() {
     Serial.println("---------- Stepper_Acc_Initialze_Start -----------");
     if(!prefs.begin("stepper", false)) {
         Serial.println("Failed to initialize preferences");
+        generateSCurveStepTimes(&accArrays[RACE_ID], ACC_PULSE_OF_RACE, 0.01 / 2);
+        generateSCurveStepTimes(&accArrays[TURN_ID], ACC_PULSE_OF_TURN, 0.05 / 2);
+        generateSCurveStepTimes(&accArrays[TWIST_ID], ACC_PULSE_OF_TWIST, 0.03 / 2);
+        generateSCurveStepTimes(&accArrays[DEBUG_ID], ACC_PULSE_OF_DEBUG, 0.08 / 2);
+        Serial.println("Generated accArrays to flash");
         return;
     }
     if (prefs.isKey("accArrays")) {
@@ -170,6 +180,7 @@ void Pulse_Sender(int pin, int num) {
 
     int id = (pin == STEPPER_L_PUL) ? robot.l.isTight*((int)robot.r.isTight + 1) : robot.r.isTight * ((int)robot.l.isTight + 1);
     
+
     int accPulse = accArrays[id].accPulse;
     int* stepTimes = accArrays[id].stepTimes;
 

@@ -9,9 +9,10 @@
 // op：操作 ID，0 表示打开，1 表示紧闭，2 表示松开，3 表示轻微打开，4 表示轻微紧闭
 // 6 表示全紧闭，7 表示全松开
 void Hand_Control(int id, int op) {
+    Serial.printf("%d %d\n", id, op);
     switch (op) {
         case 0: if(id==2) L_HAND_LOOSE(); else R_HAND_LOOSE(); break;
-        case 1: if(id==2) L_HAND_TIGHT(); else R_HAND_TIGHT(); break;
+        case 1: Serial.println("sdkjfh aksfksgf"); if(id==2) L_HAND_TIGHT(); else R_HAND_TIGHT(); break;
         case 6: HAND_ALL_TIGHT(); break;
         case 7: HAND_ALL_LOOSE(); break;
         case 9: if(id==2) Start_L_Hand_Tight_Long(); else Start_R_Hand_Tight_Long(); break;

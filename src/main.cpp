@@ -112,19 +112,19 @@ void Instruction_Executant(void *pvParameters) {
             operation = ins[3]; // 获取操作号
             
             Serial.print("operated: ");
-            if(device_id == '1' || device_id == '3') Serial.print("L");
-            else if(device_id == '2' || device_id == '4') Serial.print("R");
+            if(device_id == '1' || device_id == '2') Serial.print("L");
+            else if(device_id == '3' || device_id == '4') Serial.print("R");
 
             switch (device_id) {
                 case '1': case '3': 
                     Serial.println(operation);
                     if (robot.l.isTight && robot.r.isTight && operation >= '5') robot.curTwist = true;
                     if (robot.preTwist && robot.curTwist) delay(Continous_Twist_Delay); // 连续拧动延迟
-                    Stepper_Control(device_id, operation); // 控制电机转动
+                    Stepper_Control(device_id-'0', operation-'0'); // 控制电机转动
                 break;
-                case '2': case '4': 
-                    Serial.println(operation?"Open":"Close");
-                    Hand_Control(device_id, operation); // 控制电磁铁开合
+                case '2': case '4':
+                    Serial.println((operation-'0')?"Close":"Open");
+                    Hand_Control(device_id-'0', operation-'0'); // 控制电磁铁开合
                 break;
                 case '0': case '7':
                     Serial.println("#Over");

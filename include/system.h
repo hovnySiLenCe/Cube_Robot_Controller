@@ -18,11 +18,12 @@
 #define STEPPER_R_ALM 4  // 右电机报警引脚
 
 // 电磁铁引脚
-#define MAGNET_L_PIN 9
+#define MAGNET_L_PIN 12
 #define MAGNET_R_PIN 11
 
 // 按钮引脚
 #define BUTTOM_START_PIN 21
+
 #define BUTTOM_RESET_PIN 48
 #define BUTTOM_RELAX_PIN 38
 #define BUTTOM_TIGHT_PIN 38//!!
@@ -48,13 +49,13 @@
 #define Magnet_Delta_Delay 5
 #define Continous_Twist_Delay 10 // 连续拧动的延迟，单位ms
 
-#define STEPPER_REVERSE_DELAY 5000 // 初始位置延迟，单位us
-#define STEPPER_DEBUG_DELAY 5000 // 轻微延迟，单位us
+#define STEPPER_REVERSE_DELAY 3000 // 初始位置延迟，单位us
+#define STEPPER_DEBUG_DELAY 3000 // 轻微延迟，单位us
 
 // ----------- 脉冲数设置 -----------
 // 补偿脉冲
-#define stepperLcorrection 0
-#define stepperRcorrection 0
+#define stepperLcorrection 39
+#define stepperRcorrection 42
 
 #define PULSE360 2000 // 360度转动的脉冲数
 #define PULSE180 1000 // 180度转动的脉冲数
@@ -102,6 +103,6 @@ typedef struct {
 }Robot_Monitor_t;
 
 extern Robot_Monitor_t robot;
-extern Preferences prefs;
+// extern Preferences prefs;
 
 #endif

@@ -1,18 +1,19 @@
 #include "datasheet.h"
 
 Data_Sheet_t dsheet; // 数据表结构体
+Preferences prefsDataSheet; // 用于存储数据的对象
 void Data_Sheet_Init() {
-    if(!prefs.begin("data_sheet", false))
+    if(!prefsDataSheet.begin("data_sheet", false))
     {
         Serial.println("Failed to initialize preferences");
         return;
     }
-    if (prefs.isKey("data_sheet")) {
-        prefs.getBytes("data_sheet", &dsheet, sizeof(dsheet));
+    if (prefsDataSheet.isKey("data_sheet")) {
+        prefsDataSheet.getBytes("data_sheet", &dsheet, sizeof(dsheet));
         Serial.println("Loaded data_sheet from flash");
         return;
     }
-    prefs.putBytes("data_sheet", &dsheet, sizeof(dsheet));
+    prefsDataSheet.putBytes("data_sheet", &dsheet, sizeof(dsheet));
     Serial.println("Saved data_sheet to flash");
 }
 
@@ -28,7 +29,7 @@ void Data_Sheet_Modify(int operation) {
 }
 
 void Data_Sheet_Save() {
-    if(prefs.putBytes("data_sheet", &dsheet, sizeof(dsheet))) {
+    if(prefsDataSheet.putBytes("data_sheet", &dsheet, sizeof(dsheet))) {
         Serial.println("Data_Sheet Saved Successfully");
         return;
     }
