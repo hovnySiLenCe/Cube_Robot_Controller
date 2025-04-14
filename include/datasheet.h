@@ -46,8 +46,8 @@ struct Data_Sheet_t {
     key[STEPPER_DEBUG_DELAY_ID] = 5000; // 轻微延迟，单位us
 
     // ----------- 脉冲数设置 -----------
-    key[STEPPER_L_CORRECTION_ID] = 0; // 补偿脉冲
-    key[STEPPER_R_CORRECTION_ID] = 0;
+    key[STEPPER_L_CORRECTION_ID] = 39; // 补偿脉冲
+    key[STEPPER_R_CORRECTION_ID] = 42;
 
     key[PULSE_360_ID] = 2000; // 360度转动的脉冲数
     key[PULSE_180_ID] = 1000; // 180度转动的脉冲数

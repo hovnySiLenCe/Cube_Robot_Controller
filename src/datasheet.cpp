@@ -31,6 +31,11 @@ void Data_Sheet_Modify(int operation) {
 void Data_Sheet_Save() {
     if(prefsDataSheet.putBytes("data_sheet", &dsheet, sizeof(dsheet))) {
         Serial.println("Data_Sheet Saved Successfully");
+        Serial.println("Current Data_Sheet:");
+        for (int i = 0; i < MAX_KEY_NUM; i++) {
+            Serial.printf("%04d ",  dsheet.key[i]);
+            if(i%10 == 9) Serial.println();
+        }
         return;
     }
     Serial.println("Data_Sheet Save Failed");

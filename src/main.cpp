@@ -53,8 +53,6 @@ void setup() {
 	xTaskCreatePinnedToCore(Instruction_Executant, "Instruction_Executant", 10000, NULL, 3, &executant, 1);
     delay(500);
 
-    
-
     Stepper_Position_Init();
     Serial.println("{stepper position initialized}");
     
@@ -74,9 +72,9 @@ void Serial_Reader(void *pvParameters) {
         tmpstr[strcur++] = c;
         if (c == '\n' || c== '\r' || strcur == 8) {
             tmpstr[strcur] = '\0';
-            Serial.print("received: ");
-            Serial.println(tmpstr);
-            xQueueSend(instructions, tmpstr, 100); // 将指令发送到队列
+            Serial.printf("received: %s\n", tmpstr);
+            if(tmpstr[2] == '8') robot.isReady = false;
+            else xQueueSend(instructions, tmpstr, 100); // 将指令发送到队列
             strcur = 0;
         }
         }
@@ -111,7 +109,7 @@ void Instruction_Executant(void *pvParameters) {
             device_id = ins[1];  // 获取设备号
             operation = ins[3]; // 获取操作号
             
-            Serial.print("operated: ");
+            if(device_id != 'W') Serial.print("operated: ");
             if(device_id == '1' || device_id == '2') Serial.print("L");
             else if(device_id == '3' || device_id == '4') Serial.print("R");
 
@@ -130,12 +128,15 @@ void Instruction_Executant(void *pvParameters) {
                     Serial.println("#Over");
                 break;
                 case 'R':
+                    Serial.println("Date_Sheet_Read");
                     Data_Sheet_Read();
                 break;
                 case 'W':
+                    //Serial.printf("Modify: %d\n", String2Int(ins + 2));
                     Data_Sheet_Modify(String2Int(ins + 2));
                 break;
                 case 'E':
+                    Serial.println("Date_Sheet_Save");
                     Data_Sheet_Save();
                 break;
                 default: break;
