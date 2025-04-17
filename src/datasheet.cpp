@@ -3,6 +3,7 @@
 Data_Sheet_t dsheet; // 数据表结构体
 Preferences prefsDataSheet; // 用于存储数据的对象
 void Data_Sheet_Init() {
+    Serial.println("--------- Initializing data_sheet... ----------");
     if(!prefsDataSheet.begin("data_sheet", false))
     {
         Serial.println("Failed to initialize preferences");

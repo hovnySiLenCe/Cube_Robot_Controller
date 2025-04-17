@@ -39,10 +39,7 @@ void setup() {
     Serial.println("");
     robot.Init();
     Data_Sheet_Init();
-    Serial.println("{data sheet initialized}");
-
     Stepper_Acc_Init();
-    Serial.println("{acc parameters initialized}");
     
 	instructions = xQueueCreate(200, 9 * sizeof(char)); // 创建队列
 	if (instructions == NULL) {
@@ -54,8 +51,6 @@ void setup() {
     delay(500);
 
     Stepper_Position_Init();
-    Serial.println("{stepper position initialized}");
-    
 	Serial.println("---------- successfully initialized ----------");
 }
 
@@ -73,7 +68,7 @@ void Serial_Reader(void *pvParameters) {
         if (c == '\n' || c== '\r' || strcur == 8) {
             tmpstr[strcur] = '\0';
             Serial.printf("received: %s\n", tmpstr);
-            if(tmpstr[2] == '8') robot.isReady = false;
+            if(tmpstr[1] == '8') robot.isReady = false;
             else xQueueSend(instructions, tmpstr, 100); // 将指令发送到队列
             strcur = 0;
         }
