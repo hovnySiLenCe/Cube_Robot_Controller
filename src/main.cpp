@@ -122,6 +122,16 @@ void Instruction_Executant(void *pvParameters) {
                 case '0': case '7':
                     Serial.println("#Over");
                 break;
+                case '8':
+                    Serial.println("#Emergency");
+                    robot.isReady = false;
+                    HAND_ALL_LOOSE();
+                    STEPPER_ALL_OFF();
+                break;
+                case '9':
+                    Serial.println("#Debug");
+                    robot.isReady = true;
+                break;
                 case 'R':
                     Serial.println("Date_Sheet_Read");
                     Data_Sheet_Read();
