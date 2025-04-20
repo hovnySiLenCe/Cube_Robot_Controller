@@ -9,8 +9,6 @@
 // 8: 180度
 void Stepper_Control(int id, int op) {
 
-    Serial.printf("id = %d op = %d\n", id, op);
-
     int pin_dir = (id == 1 ? STEPPER_L_DIR : STEPPER_R_DIR);
     int pin_pul = (id == 1 ? STEPPER_L_PUL : STEPPER_R_PUL);
     int *degree = (id == 1 ? &robot.l.degree : &robot.r.degree);
@@ -26,13 +24,11 @@ void Stepper_Control(int id, int op) {
         *degree += (*degree > 0 ? -360 : 360);
         break;
     case 6: 
-        Serial.println("---------- 90 degree ----------");
         digitalWrite(pin_dir, HIGH);
         Pulse_Sender(pin_pul, PULSE90);
         *degree += 90;
         break;
     case 7:
-        Serial.println("---------- -90 degree ----------");
         digitalWrite(pin_dir, LOW);
         Pulse_Sender(pin_pul, PULSE90);
         *degree -= 90;
