@@ -1,5 +1,9 @@
 #include "stepper.h"
 
+bool ValidityCheck(int id) {
+    int degree = (id == 3 ? robot.l.degree : robot.r.degree);
+    return abs(degree % 180) != 90;
+}
 // 根据指令设置电机方向并发送脉冲
 // 3: 顺时针轻微转动
 // 4: 逆时针轻微转动
@@ -12,6 +16,11 @@ void Stepper_Control(int id, int op) {
     int pin_dir = (id == 1 ? STEPPER_L_DIR : STEPPER_R_DIR);
     int pin_pul = (id == 1 ? STEPPER_L_PUL : STEPPER_R_PUL);
     int *degree = (id == 1 ? &robot.l.degree : &robot.r.degree);
+
+    if(!ValidityCheck(id)) {
+        Serial.println("Command Illegal!");
+        return;
+    }
 
     switch (op) {
     case 3: case 4:
@@ -49,7 +58,7 @@ void Stepper_Control(int id, int op) {
 #define ACW LOW
 
 void Stepper_Position_Init() {
-    Serial.println("---------- Stepper_Position_Initialze_Start ----------");
+    Serial.println("---------- Initializing Stepper Position ----------");
     // 校正电机方向
     digitalWrite(STEPPER_L_DIR, ACW);
     //Pulse_Sender(STEPPER_L_PUL, PULSE360 / 8);
@@ -61,7 +70,7 @@ void Stepper_Position_Init() {
     }
     digitalWrite(STEPPER_L_DIR, CW);
     Pulse_Sender(STEPPER_L_PUL, PULSE360/8-stepperLcorrection);
-    Serial.println("L_Stepper_Initialized");
+    Serial.println("  √: L_Stepper_Initialized");
 
     // stepperLcorrection 是微调参数
     digitalWrite(STEPPER_R_DIR, ACW);
@@ -73,7 +82,7 @@ void Stepper_Position_Init() {
     }
     digitalWrite(STEPPER_R_DIR, CW);
     Pulse_Sender(STEPPER_R_PUL, PULSE360/8-stepperRcorrection);
-    Serial.println("R_Stepper_Initialized");
+    Serial.println("  √: R_Stepper_Initialized");
     robot.isReady = true;
     return;
 }
@@ -142,19 +151,19 @@ bool generateSCurveStepTimes(Acc_Array_t* acc_p, int pulse_x, double T_mid)
 
 Preferences prefs; // 用于存储数据的对象
 void Stepper_Acc_Init() {
-    Serial.println("---------- Stepper_Acc_Initialze_Start -----------");
+    Serial.println("----- Initializing Stepper Acceleration Curve ------");
     if(!prefs.begin("stepper", false)) {
-        Serial.println("Failed to initialize preferences");
+        Serial.println("  × Failed to initialize preferences");
         generateSCurveStepTimes(&accArrays[RACE_ID], ACC_PULSE_OF_RACE, 0.01 / 2);
         generateSCurveStepTimes(&accArrays[TURN_ID], ACC_PULSE_OF_TURN, 0.05 / 2);
         generateSCurveStepTimes(&accArrays[TWIST_ID], ACC_PULSE_OF_TWIST, 0.03 / 2);
         generateSCurveStepTimes(&accArrays[DEBUG_ID], ACC_PULSE_OF_DEBUG, 0.08 / 2);
-        Serial.println("Generated accArrays to flash");
+        Serial.println("  √ Generated accArrays to flash");
         return;
     }
     if (prefs.isKey("accArrays")) {
         prefs.getBytes("accArrays", &accArrays, sizeof(accArrays));
-        Serial.println("Loaded accArrays from flash");
+        Serial.println("  √ Loaded accArrays from flash");
         return;
     }
     bool isSame = true;
@@ -164,12 +173,12 @@ void Stepper_Acc_Init() {
     isSame &= generateSCurveStepTimes(&accArrays[DEBUG_ID], ACC_PULSE_OF_DEBUG, 0.08 / 2);
     
     if(isSame) {
-        Serial.println("No need to update accArrays");
+        Serial.println("  - No need to update accArrays");
         return;
     }
 
     prefs.putBytes("accArrays", &accArrays, sizeof(accArrays));
-    Serial.println("Saved accArrays to flash");
+    Serial.println("  √ Saved accArrays to flash");
 }
 
 void Pulse_Sender(int pin, int num) {

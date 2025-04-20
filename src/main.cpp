@@ -51,7 +51,7 @@ void setup() {
     delay(500);
 
     Stepper_Position_Init();
-	Serial.println("---------- successfully initialized ----------");
+	Serial.println("---------- Successfully Initialized ----------");
 }
 
 void loop() {
