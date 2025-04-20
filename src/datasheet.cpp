@@ -6,16 +6,16 @@ void Data_Sheet_Init() {
     Serial.println("--------- Initializing Data_Sheet ----------");
     if(!prefsDataSheet.begin("data_sheet", false))
     {
-        Serial.println("  × Failed to initialize preferences");
+        Serial.println("FETAL: Failed to initialize preferences");
         return;
     }
     if (prefsDataSheet.isKey("data_sheet")) {
         prefsDataSheet.getBytes("data_sheet", &dsheet, sizeof(dsheet));
-        Serial.println("  √ Loaded data_sheet from flash");
+        Serial.println("SUCCESS: Loaded data_sheet from flash");
         return;
     }
     prefsDataSheet.putBytes("data_sheet", &dsheet, sizeof(dsheet));
-    Serial.println("  √ Saved data_sheet to flash");
+    Serial.println("SUCCESS: Saved data_sheet to flash");
 }
 
 void Data_Sheet_Read() {
