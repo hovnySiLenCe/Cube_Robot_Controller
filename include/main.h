@@ -14,9 +14,9 @@ void Serial_Reader(void *pvParameters);
 void Instruction_Executant(void *pvParameters);
 
 // 系统控制函数
-void System_Relax();
+void System_Relax(bool isFromPC);
 void System_Start();
-void System_Reset();
+void System_Reset(bool isFromPC);
 
 void PWM_Sender();
 

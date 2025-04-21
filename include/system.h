@@ -40,33 +40,39 @@
 
 // ----------- 延时设置 -----------
 
-#define Magnet_Tight_Delay 50 // 单位ms
-#define Magnet_Loose_Delay 111
+#define Magnet_Tight_Delay dsheet.key[MAGNET_TIGHT_DELAY_ID] // 单位ms
+#define Magnet_Loose_Delay dsheet.key[MAGNET_LOOSE_DELAY_ID]
 
-#define Magnet_Tight_Ratio_Delay 5 // 单位ms
-#define Magnet_Loose_Ratio_Delay 15
+#define Magnet_Tight_Ratio_Delay dsheet.key[MAGNET_TIGHT_RATIO_DELAY_ID] // 单位ms
+#define Magnet_Loose_Ratio_Delay dsheet.key[MAGNET_LOOSE_RATIO_DELAY_ID]
 
-#define Magnet_Delta_Delay 5
-#define Continous_Twist_Delay 10 // 连续拧动的延迟，单位ms
+#define Magnet_Delta_Delay dsheet.key[MAGNET_DELTA_DELAY_ID]
+#define Continous_Twist_Delay dsheet.key[CONTINUOUS_TWIST_DELAY_ID] // 连续拧动的延迟，单位ms
 
-#define STEPPER_REVERSE_DELAY 3000 // 初始位置延迟，单位us
-#define STEPPER_DEBUG_DELAY 3000 // 轻微延迟，单位us
+#define STEPPER_REVERSE_DELAY dsheet.key[STEPPER_REVERSE_DELAY_ID] // 初始位置延迟，单位us
+#define STEPPER_DEBUG_DELAY dsheet.key[STEPPER_DEBUG_DELAY_ID] // 轻微延迟，单位us
 
 // ----------- 脉冲数设置 -----------
 // 补偿脉冲
-#define stepperLcorrection 39
-#define stepperRcorrection 42
+#define stepperLcorrection dsheet.key[STEPPER_L_CORRECTION_ID] // 左电机补偿脉冲
+#define stepperRcorrection dsheet.key[STEPPER_R_CORRECTION_ID]
 
-#define PULSE360 2000 // 360度转动的脉冲数
-#define PULSE180 1000 // 180度转动的脉冲数
-#define PULSE90 500   // 90度转动的脉冲数
-#define DELTA_PULSE 1    // 轻微转动的脉冲数
+#define PULSE360 dsheet.key[PULSE_360_ID] // 360度转动的脉冲数
+#define PULSE180 dsheet.key[PULSE_180_ID] // 180度转动的脉冲数
+#define PULSE90 dsheet.key[PULSE_90_ID]   // 90度转动的脉冲数
+#define DELTA_PULSE dsheet.key[DELTA_PULSE_ID]    // 轻微转动的脉冲数
 
 // S型曲线加速度步数
-#define ACC_PULSE_OF_RACE 50
-#define ACC_PULSE_OF_TURN 75
-#define ACC_PULSE_OF_TWIST 50
-#define ACC_PULSE_OF_DEBUG 50
+#define ACC_PULSE_OF_RACE dsheet.key[ACC_PULSE_OF_RACE_ID]
+#define ACC_PULSE_OF_TURN dsheet.key[ACC_PULSE_OF_TURN_ID]
+#define ACC_PULSE_OF_TWIST dsheet.key[ACC_PULSE_OF_TWIST_ID]
+#define ACC_PULSE_OF_DEBUG dsheet.key[ACC_PULSE_OF_DEBUG_ID]
+
+#define ACC_TIME_OF_RACE dsheet.key[ACC_TIME_OF_RACE_ID]
+#define ACC_TIME_OF_TURN dsheet.key[ACC_TIME_OF_TURN_ID]
+#define ACC_TIME_OF_TWIST dsheet.key[ACC_TIME_OF_TWIST_ID]
+#define ACC_TIME_OF_DEBUG dsheet.key[ACC_TIME_OF_DEBUG_ID]
+
 
 // ------------ 暂未使用的参数 -----------
 #define acc_factor 5
@@ -103,6 +109,6 @@ typedef struct {
 }Robot_Monitor_t;
 
 extern Robot_Monitor_t robot;
-// extern Preferences prefs;
+//extern Preferences prefs;
 
 #endif

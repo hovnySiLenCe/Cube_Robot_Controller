@@ -2,6 +2,7 @@
 #define _MAGNET_H_
 
 #include "system.h"
+#include "datasheet.h"
 
 #define L_HAND_TIGHT()      do { digitalWrite(MAGNET_L_PIN, HIGH);delay(Magnet_Tight_Delay);robot.l.isTight=true; } while(0)
 #define R_HAND_TIGHT()      do { digitalWrite(MAGNET_R_PIN, HIGH);delay(Magnet_Tight_Delay);robot.r.isTight=true; } while(0)

@@ -2,6 +2,7 @@
 #define _STEPPER_H_
 
 #include "system.h"
+#include "datasheet.h"
 
 #define L_STEPPER_ON() digitalWrite(STEPPER_L_ENA,LOW)
 #define L_STEPPER_OFF() digitalWrite(STEPPER_L_ENA,HIGH)
@@ -25,5 +26,7 @@ void Stepper_Control(int id, int op);
 void Stepper_Position_Init();
 void Stepper_Acc_Init();
 void Pulse_Sender(int pin,int num);
+bool reGenerateSCurveStepTimes();
+void SaveAccArrays();
 
 #endif

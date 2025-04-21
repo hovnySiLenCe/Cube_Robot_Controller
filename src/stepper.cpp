@@ -111,6 +111,13 @@ void Stepper_Position_Init() {
 struct Acc_Array_t {
     int accPulse, T_mid;
     int stepTimes[MAX_STEPS];
+    void Info() {
+        Serial.printf("accPulse = %d, T_mid = %d\n", accPulse, T_mid);
+        // for(int i = 0; i < accPulse; i++) {
+        //     Serial.printf("%5d ", stepTimes[i]);
+        //     if(i % 10 == 9) Serial.println();
+        // }
+    }
     Acc_Array_t(int pulse_x, int T_mid) : accPulse(pulse_x), T_mid(T_mid) { memset(stepTimes, 0, sizeof(stepTimes)); } // 构造函数初始化
     Acc_Array_t() {}
     bool operator==(const Acc_Array_t& x) const {
@@ -119,16 +126,17 @@ struct Acc_Array_t {
 }accArrays[MAX_DELAY_SEQUENCE];
 
 // 模拟连续时间，步长 dt（秒）；dt 越小，采样越精细
-const double dt = 0.000001;
-bool generateSCurveStepTimes(Acc_Array_t* acc_p, int pulse_x, double T_mid)
+const double dt = 0.0001;
+bool generateSCurveStepTimes(Acc_Array_t* acc_p, int pulse_x, double T_mid) // T_mid 单位为ms
 {
+    Serial.printf(" -> : Generating accArrays, pulse_x = %d, T_mid = %.2f\n", pulse_x, T_mid);
     if(*acc_p == Acc_Array_t(pulse_x, T_mid)) return true; // 如果数据相同，则不重新计算
     double v_max = 2 * pulse_x / T_mid;
     double t = 0.0, lastT = 0.0;
     double lastStepPos = 0.0, pos;
     int numSteps = 0;
 
-    acc_p->T_mid = T_mid*1e6; // 单位为微秒
+    acc_p->T_mid = T_mid * 1000; // 单位为us
     acc_p->accPulse = pulse_x;
 
     // 当 t 超过加速时间或步数达到上限时停止计算
@@ -137,10 +145,10 @@ bool generateSCurveStepTimes(Acc_Array_t* acc_p, int pulse_x, double T_mid)
         // 计算当前位移 x(t)
         // 使用 smoothstep 模型： x(t) = v_max * (t^3/T_accel^2 - t^4/(2*T_accel^3))
         pos = v_max * ((t * t * t) / (T_mid * T_mid) - (t * t * t * t) / (2 * T_mid * T_mid * T_mid));
-
+        
         // 当累计位移跨过下一个整数（即步数）时，记录该时刻
         if (floor(pos) > lastStepPos) {
-            acc_p->stepTimes[numSteps++] = ((t-lastT) * 1000000.0 / 2); // 转换为微秒
+            acc_p->stepTimes[numSteps++] = (t-lastT) * 1000 / 2; // 转换为us
             lastStepPos = floor(pos);
             lastT = t;
         }
@@ -149,30 +157,34 @@ bool generateSCurveStepTimes(Acc_Array_t* acc_p, int pulse_x, double T_mid)
     return false; // 返回 false 表示数据已更新
 }
 
+bool reGenerateSCurveStepTimes() {
+    Serial.println(" -> : Regenerating accArrays");
+    bool isSame = true;
+    isSame &= generateSCurveStepTimes(&accArrays[RACE_ID], ACC_PULSE_OF_RACE, ACC_TIME_OF_RACE);
+    isSame &= generateSCurveStepTimes(&accArrays[TURN_ID], ACC_PULSE_OF_TURN, ACC_TIME_OF_TURN);
+    isSame &= generateSCurveStepTimes(&accArrays[TWIST_ID], ACC_PULSE_OF_TWIST, ACC_TIME_OF_TWIST);
+    isSame &= generateSCurveStepTimes(&accArrays[DEBUG_ID], ACC_PULSE_OF_DEBUG, ACC_TIME_OF_DEBUG);
+    return isSame;
+}
+
 Preferences prefs; // 用于存储数据的对象
 void Stepper_Acc_Init() {
     Serial.println("----- Initializing Stepper Acceleration Curve ------");
     if(!prefs.begin("stepper", false)) {
         Serial.println("FETAL: Failed to initialize preferences");
-        generateSCurveStepTimes(&accArrays[RACE_ID], ACC_PULSE_OF_RACE, 0.01 / 2);
-        generateSCurveStepTimes(&accArrays[TURN_ID], ACC_PULSE_OF_TURN, 0.05 / 2);
-        generateSCurveStepTimes(&accArrays[TWIST_ID], ACC_PULSE_OF_TWIST, 0.03 / 2);
-        generateSCurveStepTimes(&accArrays[DEBUG_ID], ACC_PULSE_OF_DEBUG, 0.08 / 2);
+        reGenerateSCurveStepTimes();
         Serial.println("SUCCESS: Generated accArrays to flash");
         return;
     }
     if (prefs.isKey("accArrays")) {
         prefs.getBytes("accArrays", &accArrays, sizeof(accArrays));
         Serial.println("SUCCESS: Loaded accArrays from flash");
+        for(int i = 0; i < MAX_DELAY_SEQUENCE; i++)
+            accArrays[i].Info();
         return;
     }
-    bool isSame = true;
-    isSame &= generateSCurveStepTimes(&accArrays[RACE_ID], ACC_PULSE_OF_RACE, 0.01 / 2);
-    isSame &= generateSCurveStepTimes(&accArrays[TURN_ID], ACC_PULSE_OF_TURN, 0.05 / 2);
-    isSame &= generateSCurveStepTimes(&accArrays[TWIST_ID], ACC_PULSE_OF_TWIST, 0.03 / 2);
-    isSame &= generateSCurveStepTimes(&accArrays[DEBUG_ID], ACC_PULSE_OF_DEBUG, 0.08 / 2);
-    
-    if(isSame) {
+
+    if(reGenerateSCurveStepTimes()) {
         Serial.println("-> : No need to update accArrays");
         return;
     }
@@ -181,13 +193,21 @@ void Stepper_Acc_Init() {
     Serial.println("SUCCESS: Saved accArrays to flash");
 }
 
+void SaveAccArrays() {
+    if(prefs.putBytes("accArrays", &accArrays, sizeof(accArrays)))
+        Serial.println("SUCCESS: Saved accArrays to flash");
+    else
+        Serial.println("FETAL: Failed to save accArrays to flash");
+}
+
 void Pulse_Sender(int pin, int num) {
 
     int id = (pin == STEPPER_L_PUL) ? robot.l.isTight*((int)robot.r.isTight + 1) : robot.r.isTight * ((int)robot.l.isTight + 1);
-    
-
+    if(!robot.isReady) id = 3;
     int accPulse = accArrays[id].accPulse;
     int* stepTimes = accArrays[id].stepTimes;
+
+    Serial.printf(" -> : Sending %d pulses to pin %d\n", num, pin);
 
     if (robot.isReady && num >= 2 * accPulse) 
     {
