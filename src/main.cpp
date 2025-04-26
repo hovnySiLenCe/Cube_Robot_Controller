@@ -13,6 +13,21 @@
 QueueHandle_t instructions;
 TaskHandle_t reader;
 TaskHandle_t executant;
+void Robot_Monitor_t:: HandConvert() {
+    delay(100);
+    if (!digitalRead(BUTTOM_HAND_PIN))
+    {
+        bool toTight = !(l.isTight | r.isTight);
+        if(toTight) HAND_ALL_TIGHT();
+        else HAND_ALL_LOOSE();
+        l.isTight = r.isTight = toTight;
+        while (true)
+        {
+            if (digitalRead(BUTTOM_START_PIN))
+                break;
+        }
+    }
+}
 
 Robot_Monitor_t robot;
 void setup() {
@@ -76,6 +91,7 @@ void Serial_Reader(void *pvParameters) {
         if (!digitalRead(BUTTOM_START_PIN)) System_Start(); // 检查开始按钮是否按下
         if (!digitalRead(BUTTOM_RELAX_PIN)) System_Relax(false); // 检查放松按钮是否按下
         if (!digitalRead(BUTTOM_RESET_PIN)) System_Reset(false); // 检查重置按钮
+        if (!digitalRead(BUTTOM_HAND_PIN)) robot.HandConvert(); // 检查手爪开合按钮
 
         // if (!digitalRead(BtnRed)) Emergency_Stop();  // 检查紧急停止按钮
         // if (!digitalRead(BtnPrepare)) Motor_Prepare(); // 检查准备按钮
@@ -183,7 +199,7 @@ void System_Reset(bool isFromPC) {
         Serial.println("#Reset");
         HAND_ALL_LOOSE();
         STEPPER_ALL_ON();
-        delay(1000);
+        delay(100);
         if (robot.l.degree % 180 != 0) {
             digitalWrite(STEPPER_L_DIR, (robot.l.degree > 0 ? LOW : HIGH));
             Pulse_Sender(STEPPER_L_PUL, round(PULSE360 * abs(robot.l.degree) / 360.0));
@@ -248,8 +264,7 @@ void Pin_Mode_Init() {
     pinMode(BUTTOM_START_PIN, INPUT_PULLUP);
     pinMode(BUTTOM_RESET_PIN, INPUT_PULLUP);
 	pinMode(BUTTOM_RELAX_PIN, INPUT_PULLUP);
-    pinMode(BUTTOM_TIGHT_PIN, INPUT_PULLUP);
-	pinMode(BUTTOM_LOOSE_PIN, INPUT_PULLUP);
+    pinMode(BUTTOM_HAND_PIN, INPUT_PULLUP);
 
     // 初始化霍尔传感器引脚
 	pinMode(SENSOR_L_PIN, INPUT_PULLDOWN);

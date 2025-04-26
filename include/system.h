@@ -23,11 +23,9 @@
 
 // 按钮引脚
 #define BUTTOM_START_PIN 21
-
 #define BUTTOM_RESET_PIN 48
 #define BUTTOM_RELAX_PIN 38
-#define BUTTOM_TIGHT_PIN 38//!!
-#define BUTTOM_LOOSE_PIN 38//!!
+#define BUTTOM_HAND_PIN 47
 
 // 霍尔传感器引脚
 #define SENSOR_L_PIN 2
@@ -106,6 +104,7 @@ typedef struct {
         isReady = isDebug = false;
         preTwist = curTwist = false;
     }
+    void HandConvert();
 }Robot_Monitor_t;
 
 extern Robot_Monitor_t robot;
