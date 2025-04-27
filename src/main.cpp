@@ -38,7 +38,7 @@ void setup() {
     HAND_ALL_LOOSE(); // 松开所有电磁铁
     STEPPER_ALL_ON(); // 使能电机
     // 初始化蜂鸣器
-    digitalWrite(BUZZER_PIN, LOW);
+    //digitalWrite(BUZZER_PIN, LOW);
 
     Serial.begin(9600);
     Serial.println("");

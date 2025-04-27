@@ -18,6 +18,4 @@ void System_Relax(bool isFromPC);
 void System_Start();
 void System_Reset(bool isFromPC);
 
-void PWM_Sender();
-
 #endif
