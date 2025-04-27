@@ -22,6 +22,9 @@
 
 #define MAX_STEPS 203
 
+#define CW LOW
+#define ACW HIGH
+
 void Stepper_Control(int id, int op);
 void Stepper_Position_Init();
 void Stepper_Acc_Init();

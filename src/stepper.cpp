@@ -24,26 +24,26 @@ void Stepper_Control(int id, int op) {
 
     switch (op) {
     case 3: case 4:
-        digitalWrite(pin_dir, (op == 3 ? HIGH : LOW));
+        digitalWrite(pin_dir, (op == 3 ? CW : ACW));
         Pulse_Sender(pin_pul, DELTA_PULSE);
         break;
     case 5:
-        digitalWrite(pin_dir, (*degree > 0 ? LOW : HIGH));
+        digitalWrite(pin_dir, (*degree > 0 ? ACW : CW));
         Pulse_Sender(pin_pul, PULSE360);
         *degree += (*degree > 0 ? -360 : 360);
         break;
     case 6: 
-        digitalWrite(pin_dir, HIGH);
+        digitalWrite(pin_dir, CW);
         Pulse_Sender(pin_pul, PULSE90);
         *degree += 90;
         break;
     case 7:
-        digitalWrite(pin_dir, LOW);
+        digitalWrite(pin_dir, ACW);
         Pulse_Sender(pin_pul, PULSE90);
         *degree -= 90;
         break;
     case 8:
-        digitalWrite(pin_dir, (*degree > 0 ? LOW : HIGH));
+        digitalWrite(pin_dir, (*degree > 0 ? ACW : CW));
         Pulse_Sender(pin_pul, PULSE180);
         *degree += (*degree > 0 ? -180 : 180);
         break;
@@ -54,33 +54,25 @@ void Stepper_Control(int id, int op) {
     // Serial.println(robot.r.degree);
 }
 
-#define CW HIGH
-#define ACW LOW
-
 void Stepper_Position_Init() {
     Serial.println("---------- Initializing Stepper Position ----------");
     // 校正电机方向
-    digitalWrite(STEPPER_L_DIR, ACW);
-    //Pulse_Sender(STEPPER_L_PUL, PULSE360 / 8);
-    //digitalWrite(STEPPER_L_DIR, LOW);
-    //delay(500);
+    digitalWrite(STEPPER_L_DIR, CW);
 
     while (digitalRead(SENSOR_L_PIN)) {
         PULSE_GENERATOR(STEPPER_L_PUL, STEPPER_REVERSE_DELAY);
     }
-    digitalWrite(STEPPER_L_DIR, CW);
+    digitalWrite(STEPPER_L_DIR, ACW);
     Pulse_Sender(STEPPER_L_PUL, PULSE360/8-stepperLcorrection);
     Serial.println("SUCCESS: L_Stepper_Initialized");
 
     // stepperLcorrection 是微调参数
-    digitalWrite(STEPPER_R_DIR, ACW);
-    //Pulse_Sender(STEPPER_R_PUL, PULSE360/8);
+    digitalWrite(STEPPER_R_DIR, CW);
+
     while (digitalRead(SENSOR_R_PIN)) {
         PULSE_GENERATOR(STEPPER_R_PUL, STEPPER_REVERSE_DELAY);
-        //Pulse_Sender(STEPPER_R_PUL, 1);
-        //delay(ReverseSpeed);
     }
-    digitalWrite(STEPPER_R_DIR, CW);
+    digitalWrite(STEPPER_R_DIR, ACW);
     Pulse_Sender(STEPPER_R_PUL, PULSE360/8-stepperRcorrection);
     Serial.println("SUCCESS: R_Stepper_Initialized");
     robot.isReady = true;
