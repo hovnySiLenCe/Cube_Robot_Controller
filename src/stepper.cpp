@@ -18,7 +18,7 @@ void Stepper_Control(int id, int op) {
     int *degree = (id == 1 ? &robot.l.degree : &robot.r.degree);
 
     if(!ValidityCheck(id)) {
-        Serial.println("Command Illegal!");
+        Serial.println("ERROR: Command Illegal!");
         return;
     }
 
