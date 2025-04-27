@@ -89,25 +89,36 @@
 #define RaceIniFreq 13320
 #define RaceEndFreq 18000
 
-typedef struct {
+class Hand_State_t {
+public:
     bool isTight;
     int degree;
-}Hand_State_t;
+    Hand_State_t() : isTight(false), degree(0) {}
+    ~Hand_State_t() {}
+    void ResetState() {
+        isTight =false;
+        degree = 0;
+    };
+};
 
-typedef struct {
+class Robot_Monitor_t {
+private:
+    /* data */
+public:
     Hand_State_t l;
     Hand_State_t r;
     bool isReady, isDebug, preTwist, curTwist;
+    Robot_Monitor_t() {};
+    ~Robot_Monitor_t() {}
     void Init() {
-        l.isTight = r.isTight = false;
-        l.degree = r.degree = 0;
+        l.ResetState();
+        r.ResetState();
         isReady = isDebug = false;
         preTwist = curTwist = false;
     }
     void HandConvert();
-}Robot_Monitor_t;
+};
 
 extern Robot_Monitor_t robot;
-//extern Preferences prefs;
 
 #endif
