@@ -72,7 +72,7 @@ void Serial_Reader(void *pvParameters) {
             tmpstr[strcur++] = c;
             if (c == '\n' || c== '\r' || strcur == 8) {
                 tmpstr[strcur] = '\0';
-                Serial.printf("received: %s\n", tmpstr);
+                //Serial.printf("received: %s\n", tmpstr);
                 switch (tmpstr[1]) {
                 case '8':
                     System_Relax(true); // 系统放松
@@ -200,18 +200,19 @@ void System_Reset(bool isFromPC) {
         HAND_ALL_LOOSE();
         STEPPER_ALL_ON();
         delay(100);
+        robot.isDebug = true;
         if (robot.l.degree % 180 != 0) {
-            digitalWrite(STEPPER_L_DIR, (robot.l.degree > 0 ? LOW : HIGH));
+            digitalWrite(STEPPER_L_DIR, (robot.l.degree > 0 ? ACW : CW));
             Pulse_Sender(STEPPER_L_PUL, round(PULSE360 * abs(robot.l.degree) / 360.0));
             delay(1000);
-            digitalWrite(STEPPER_R_DIR, (robot.r.degree > 0 ? LOW : HIGH));
+            digitalWrite(STEPPER_R_DIR, (robot.r.degree > 0 ? ACW : CW));
             Pulse_Sender(STEPPER_R_PUL, round(PULSE360 * abs(robot.r.degree) / 360.0));
         }
         else {
-            digitalWrite(STEPPER_R_DIR, (robot.r.degree > 0 ? LOW : HIGH));
+            digitalWrite(STEPPER_R_DIR, (robot.r.degree > 0 ? ACW : CW));
             Pulse_Sender(STEPPER_R_PUL, round(PULSE360 * abs(robot.r.degree) / 360.0));
             delay(1000);
-            digitalWrite(STEPPER_L_DIR, (robot.l.degree > 0 ? LOW : HIGH));
+            digitalWrite(STEPPER_L_DIR, (robot.l.degree > 0 ? ACW : CW));
             Pulse_Sender(STEPPER_L_PUL, round(PULSE360 * abs(robot.l.degree) / 360.0));
         }
         robot.Init();

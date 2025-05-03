@@ -199,9 +199,9 @@ void Pulse_Sender(int pin, int num) {
     int accPulse = accArrays[id].accPulse;
     int* stepTimes = accArrays[id].stepTimes;
 
-    Serial.printf(" -> : Sending %d pulses to pin %d\n", num, pin);
+    //Serial.printf(" -> : Sending %d pulses to pin %d\n", num, pin);
 
-    if (robot.isReady && num >= 2 * accPulse) 
+    if (robot.isReady && num >= 2 * accPulse && !robot.isDebug) 
     {
         for (int i = 0; i < accPulse; i++)
             PULSE_GENERATOR(pin, stepTimes[i]);
