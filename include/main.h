@@ -2,6 +2,7 @@
 #define _MAIN_H
 
 #include <Arduino.h>
+#include <esp_task_wdt.h>
 
 #include "magnet.h"
 #include "stepper.h"

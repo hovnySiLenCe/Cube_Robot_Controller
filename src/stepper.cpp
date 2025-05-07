@@ -199,6 +199,7 @@ void Pulse_Sender(int pin, int num) {
     int accPulse = accArrays[id].accPulse;
     int* stepTimes = accArrays[id].stepTimes;
 
+    //Serial.printf(" -> : id = %d\n", id);
     //Serial.printf(" -> : Sending %d pulses to pin %d\n", num, pin);
 
     if (robot.isReady && num >= 2 * accPulse && !robot.isDebug) 

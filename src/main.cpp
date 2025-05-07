@@ -32,6 +32,7 @@ void Robot_Monitor_t:: HandConvert() {
 Robot_Monitor_t robot;
 void setup() {
     esp_log_level_set("*", ESP_LOG_NONE);
+    esp_task_wdt_init(30, false);
     //esp_log_level_set("esp_system", ESP_LOG_NONE);
     // 初始化引脚
 	Pin_Mode_Init();
@@ -199,7 +200,7 @@ void System_Reset(bool isFromPC) {
         Serial.println("#Reset");
         HAND_ALL_LOOSE();
         STEPPER_ALL_ON();
-        delay(100);
+        vTaskDelay(100);
         robot.isDebug = true;
         if (robot.l.degree % 180 != 0) {
             digitalWrite(STEPPER_L_DIR, (robot.l.degree > 0 ? ACW : CW));
