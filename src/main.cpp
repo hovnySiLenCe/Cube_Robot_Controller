@@ -204,24 +204,23 @@ void System_Reset(bool isFromPC) {
         if (robot.l.degree % 180 != 0) {
             digitalWrite(STEPPER_L_DIR, (robot.l.degree > 0 ? ACW : CW));
             Pulse_Sender(STEPPER_L_PUL, round(PULSE360 * abs(robot.l.degree) / 360.0));
-            delay(1000);
+            vTaskDelay(500);
             digitalWrite(STEPPER_R_DIR, (robot.r.degree > 0 ? ACW : CW));
             Pulse_Sender(STEPPER_R_PUL, round(PULSE360 * abs(robot.r.degree) / 360.0));
         }
         else {
             digitalWrite(STEPPER_R_DIR, (robot.r.degree > 0 ? ACW : CW));
             Pulse_Sender(STEPPER_R_PUL, round(PULSE360 * abs(robot.r.degree) / 360.0));
-            delay(1000);
+            vTaskDelay(500);
             digitalWrite(STEPPER_L_DIR, (robot.l.degree > 0 ? ACW : CW));
             Pulse_Sender(STEPPER_L_PUL, round(PULSE360 * abs(robot.l.degree) / 360.0));
         }
+
+        vTaskDelay(5);
+
         robot.Init();
         Stepper_Position_Init();
 
-        while (true) {
-            if (digitalRead(BUTTOM_RESET_PIN) || isFromPC)
-                break;
-        }
     }
     return;
 }
