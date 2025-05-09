@@ -18,36 +18,42 @@ void Stepper_Control(int id, int op) {
     int *degree = (id == 1 ? &robot.l.degree : &robot.r.degree);
 
     if(!ValidityCheck(id)) {
-        Serial.println("ERROR: Command Illegal!");
+        Serial.println("\b [ERROR] Command Illegal!");
         return;
     }
 
     switch (op) {
     case 3: case 4:
+        Serial.println(((op == 3) ? "CW 1 pulse" : "ACW 1 pulse"));
         digitalWrite(pin_dir, (op == 3 ? CW : ACW));
         Pulse_Sender(pin_pul, DELTA_PULSE);
         break;
     case 5:
+        Serial.println((*degree > 0 ? -360 : 360));
         digitalWrite(pin_dir, (*degree > 0 ? ACW : CW));
         Pulse_Sender(pin_pul, PULSE360);
         *degree += (*degree > 0 ? -360 : 360);
         break;
     case 6: 
+        Serial.println(90);
         digitalWrite(pin_dir, CW);
         Pulse_Sender(pin_pul, PULSE90);
         *degree += 90;
         break;
     case 7:
+        Serial.println(-90);
         digitalWrite(pin_dir, ACW);
         Pulse_Sender(pin_pul, PULSE90);
         *degree -= 90;
         break;
     case 8:
+        Serial.println((*degree > 0 ? -180 : 180));
         digitalWrite(pin_dir, (*degree > 0 ? ACW : CW));
         Pulse_Sender(pin_pul, PULSE180);
         *degree += (*degree > 0 ? -180 : 180);
         break;
     default:
+        Serial.println(" Invalid Command");
         return;
     }
     // Serial.println(robot.l.degree);
@@ -64,7 +70,7 @@ void Stepper_Position_Init() {
     }
     digitalWrite(STEPPER_L_DIR, ACW);
     Pulse_Sender(STEPPER_L_PUL, PULSE360/8-stepperLcorrection);
-    Serial.println("SUCCESS: L_Stepper_Initialized");
+    Serial.println("[SUCCESS] L_Stepper_Initialized");
 
     // stepperLcorrection 是微调参数
     digitalWrite(STEPPER_R_DIR, CW);
@@ -74,7 +80,7 @@ void Stepper_Position_Init() {
     }
     digitalWrite(STEPPER_R_DIR, ACW);
     Pulse_Sender(STEPPER_R_PUL, PULSE360/8-stepperRcorrection);
-    Serial.println("SUCCESS: R_Stepper_Initialized");
+    Serial.println("[SUCCESS] R_Stepper_Initialized");
     robot.isReady = true;
     return;
 }
@@ -121,7 +127,7 @@ struct Acc_Array_t {
 const double dt = 0.0001;
 bool generateSCurveStepTimes(Acc_Array_t* acc_p, int pulse_x, double T_mid) // T_mid 单位为ms
 {
-    Serial.printf(" -> : Generating accArrays, pulse_x = %d, T_mid = %.2f\n", pulse_x, T_mid);
+    Serial.printf("[INFO] Generating accArrays, pulse_x = %d, T_mid = %.2f\n", pulse_x, T_mid);
     if(*acc_p == Acc_Array_t(pulse_x, T_mid)) return true; // 如果数据相同，则不重新计算
     double v_max = 2 * pulse_x / T_mid;
     double t = 0.0, lastT = 0.0;
@@ -150,7 +156,7 @@ bool generateSCurveStepTimes(Acc_Array_t* acc_p, int pulse_x, double T_mid) // T
 }
 
 bool reGenerateSCurveStepTimes() {
-    Serial.println(" -> : Regenerating accArrays");
+    Serial.println("[INFO] Regenerating accArrays");
     bool isSame = true;
     isSame &= generateSCurveStepTimes(&accArrays[RACE_ID], ACC_PULSE_OF_RACE, ACC_TIME_OF_RACE);
     isSame &= generateSCurveStepTimes(&accArrays[TURN_ID], ACC_PULSE_OF_TURN, ACC_TIME_OF_TURN);
@@ -163,33 +169,33 @@ Preferences prefs; // 用于存储数据的对象
 void Stepper_Acc_Init() {
     Serial.println("----- Initializing Stepper Acceleration Curve ------");
     if(!prefs.begin("stepper", false)) {
-        Serial.println("FETAL: Failed to initialize preferences");
+        Serial.println("[FETAL] Failed to initialize preferences");
         reGenerateSCurveStepTimes();
-        Serial.println("SUCCESS: Generated accArrays to flash");
+        Serial.println("[SUCCESS] Generated accArrays to flash");
         return;
     }
     if (prefs.isKey("accArrays")) {
         prefs.getBytes("accArrays", &accArrays, sizeof(accArrays));
-        Serial.println("SUCCESS: Loaded accArrays from flash");
+        Serial.println("[SUCCESS] Loaded accArrays from flash");
         for(int i = 0; i < MAX_DELAY_SEQUENCE; i++)
             accArrays[i].Info();
         return;
     }
 
     if(reGenerateSCurveStepTimes()) {
-        Serial.println("-> : No need to update accArrays");
+        Serial.println("[INFO] No need to update accArrays");
         return;
     }
 
     prefs.putBytes("accArrays", &accArrays, sizeof(accArrays));
-    Serial.println("SUCCESS: Saved accArrays to flash");
+    Serial.println("[SUCCESS] Saved accArrays to flash");
 }
 
 void SaveAccArrays() {
     if(prefs.putBytes("accArrays", &accArrays, sizeof(accArrays)))
-        Serial.println("SUCCESS: Saved accArrays to flash");
+        Serial.println("[SUCCESS] Saved accArrays to flash");
     else
-        Serial.println("FETAL: Failed to save accArrays to flash");
+        Serial.println("[FETAL] Failed to save accArrays to flash");
 }
 
 void Pulse_Sender(int pin, int num) {

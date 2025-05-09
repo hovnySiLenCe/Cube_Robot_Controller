@@ -5,18 +5,18 @@ Preferences prefsDataSheet; // 用于存储数据的对象
 void Data_Sheet_Init() {
     Serial.println("--------- Initializing Data_Sheet ----------");
     if(!prefsDataSheet.begin("data_sheet", false)) {
-        Serial.println("FETAL: Failed to initialize preferences");
+        Serial.println("[FETAL] Failed to initialize preferences");
         return;
     }
     if (prefsDataSheet.isKey("data_sheet")) {
         prefsDataSheet.getBytes("data_sheet", &tmp_ds, sizeof(tmp_ds));
         dsheet.Merge(tmp_ds);
-        Serial.println("SUCCESS: Loaded data_sheet from flash");
+        Serial.println("[SUCCESS] Loaded data_sheet from flash");
         dsheet.Show();
         return;
     }
     prefsDataSheet.putBytes("data_sheet", &dsheet, sizeof(dsheet));
-    Serial.println("SUCCESS: Saved data_sheet to flash");
+    Serial.println("[SUCCESS] Saved data_sheet to flash");
 }
 
 void Data_Sheet_Read() {
@@ -32,12 +32,12 @@ void Data_Sheet_Modify(int operation) {
 
 void Data_Sheet_Save() {
     if(prefsDataSheet.putBytes("data_sheet", &dsheet, sizeof(dsheet))) {
-        Serial.println("SUCCESS: Data_Sheet Saved Successfully");
+        Serial.println("[SUCCESS] Data_Sheet Saved Successfully");
         Serial.println("Current Data_Sheet:");
         dsheet.Show();
         reGenerateSCurveStepTimes();
         SaveAccArrays();
         return;
     }
-    Serial.println("FETAL: Data_Sheet Save Failed");
+    Serial.println("[FETAL] Data_Sheet Save Failed");
 }

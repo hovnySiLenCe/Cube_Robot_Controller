@@ -49,7 +49,7 @@ void setup() {
     
 	instructions = xQueueCreate(200, 9 * sizeof(char)); // 创建队列
 	if (instructions == NULL) {
-		Serial.println("{failed to create queue}");
+		Serial.println("[FETAL] failed to create queue");
 	}
 	xTaskCreatePinnedToCore(Serial_Reader, "Serial_Reader", 10000, NULL, 3, &reader, 0);
 	delay(500);
@@ -120,13 +120,14 @@ void Instruction_Executant(void *pvParameters) {
             device_id = ins[1];  // 获取设备号
             operation = ins[3]; // 获取操作号
             
-            if(device_id != 'W') Serial.print("operated: ");
+            if(device_id != 'W') Serial.print("[INFO] Operated: ");
+
             if(device_id == '1' || device_id == '2') Serial.print("L");
             else if(device_id == '3' || device_id == '4') Serial.print("R");
 
             switch (device_id) {
                 case '1': case '3': 
-                    Serial.println(operation);
+                    //Serial.println(operation);
                     if (robot.l.isTight && robot.r.isTight && operation >= '5') robot.curTwist = true;
                     if (robot.preTwist && robot.curTwist) delay(Continous_Twist_Delay); // 连续拧动延迟
                     Stepper_Control(device_id-'0', operation-'0'); // 控制电机转动
