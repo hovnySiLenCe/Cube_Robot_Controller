@@ -133,7 +133,7 @@ void Instruction_Executant(void *pvParameters) {
                     Stepper_Control(device_id-'0', operation-'0'); // 控制电机转动
                 break;
                 case '2': case '4':
-                    Serial.println((operation-'0')?"Close":"Open");
+                    Serial.println((operation=='0'||operation=='7')?"Open":"Close");
                     Hand_Control(device_id-'0', operation-'0'); // 控制电磁铁开合
                 break;
                 case '0': case '7':
