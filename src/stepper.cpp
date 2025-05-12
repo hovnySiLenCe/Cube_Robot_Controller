@@ -169,7 +169,7 @@ Preferences prefs; // 用于存储数据的对象
 void Stepper_Acc_Init() {
     Serial.println("----- Initializing Stepper Acceleration Curve ------");
     if(!prefs.begin("stepper", false)) {
-        Serial.println("[FETAL] Failed to initialize preferences");
+        Serial.println("[FATAL] Failed to initialize preferences");
         reGenerateSCurveStepTimes();
         Serial.println("[SUCCESS] Generated accArrays to flash");
         return;
@@ -195,7 +195,7 @@ void SaveAccArrays() {
     if(prefs.putBytes("accArrays", &accArrays, sizeof(accArrays)))
         Serial.println("[SUCCESS] Saved accArrays to flash");
     else
-        Serial.println("[FETAL] Failed to save accArrays to flash");
+        Serial.println("[FATAL] Failed to save accArrays to flash");
 }
 
 void Pulse_Sender(int pin, int num) {

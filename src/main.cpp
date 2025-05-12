@@ -49,7 +49,7 @@ void setup() {
     
 	instructions = xQueueCreate(200, 9 * sizeof(char)); // 创建队列
 	if (instructions == NULL) {
-		Serial.println("[FETAL] failed to create queue");
+		Serial.println("[FATAL] failed to create queue");
 	}
 	xTaskCreatePinnedToCore(Serial_Reader, "Serial_Reader", 10000, NULL, 3, &reader, 0);
 	delay(500);

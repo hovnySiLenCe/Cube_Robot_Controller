@@ -5,7 +5,7 @@ Preferences prefsDataSheet; // 用于存储数据的对象
 void Data_Sheet_Init() {
     Serial.println("--------- Initializing Data_Sheet ----------");
     if(!prefsDataSheet.begin("data_sheet", false)) {
-        Serial.println("[FETAL] Failed to initialize preferences");
+        Serial.println("[FATAL] Failed to initialize preferences");
         return;
     }
     if (prefsDataSheet.isKey("data_sheet")) {
@@ -39,5 +39,5 @@ void Data_Sheet_Save() {
         SaveAccArrays();
         return;
     }
-    Serial.println("[FETAL] Data_Sheet Save Failed");
+    Serial.println("[FATAL] Data_Sheet Save Failed");
 }
