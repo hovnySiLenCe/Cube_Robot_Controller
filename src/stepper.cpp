@@ -127,7 +127,7 @@ struct Acc_Array_t {
 const double dt = 0.0001;
 bool generateSCurveStepTimes(Acc_Array_t* acc_p, int speed_x, double T_mid) // T_mid 单位为ms
 {
-    Serial.printf("[INFO] Generating accArrays, pulse_x = %d sps, T_mid = %d ms\n", speed_x, T_mid);
+    Serial.printf("[INFO] Generating accArrays, speed_x = %d sps, T_mid = %d ms\n", speed_x, T_mid);
     if(*acc_p == Acc_Array_t(speed_x, T_mid)) return true; // 如果数据相同，则不重新计算
     int pulse_x = (int)(speed_x * T_mid / 1000.0); // 计算脉冲数
     double v_max = 2 * pulse_x / T_mid;
