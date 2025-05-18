@@ -104,7 +104,6 @@ void Stepper_Position_Init() {
 #define TWIST_ID 2
 #define DEBUG_ID 3
 
-
 // 定义用来存储S型曲线的结构体
 struct Acc_Array_t {
     int accPulse, T_mid;
@@ -127,15 +126,15 @@ struct Acc_Array_t {
 const double dt = 0.0001;
 bool generateSCurveStepTimes(Acc_Array_t* acc_p, int speed_x, double T_mid) // T_mid 单位为ms
 {
-    Serial.printf("[INFO] Generating accArrays, speed_x = %d sps, T_mid = %d ms\n", speed_x, T_mid);
-    if(*acc_p == Acc_Array_t(speed_x, T_mid)) return true; // 如果数据相同，则不重新计算
     int pulse_x = (int)(speed_x * T_mid / 1000.0); // 计算脉冲数
+    Serial.printf("[INFO] Generating accArrays, speed_x = %d sps, pulse_x = %d steps, T_mid = %d ms\n", speed_x, pulse_x, T_mid);
+    if(*acc_p == Acc_Array_t(pulse_x, T_mid)) return true; // 如果数据相同，则不重新计算
     double v_max = 2 * pulse_x / T_mid;
     double t = 0.0, lastT = 0.0;
     double lastStepPos = 0.0, pos;
     int numSteps = 0;
 
-    acc_p->T_mid = T_mid * 1000; // 单位为us
+    acc_p->T_mid = T_mid; // 单位为us
     acc_p->accPulse = pulse_x;
 
     // 当 t 超过加速时间或步数达到上限时停止计算
