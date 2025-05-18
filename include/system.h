@@ -61,10 +61,10 @@
 #define DELTA_PULSE dsheet.key[DELTA_PULSE_ID]    // 轻微转动的脉冲数
 
 // S型曲线加速度步数
-#define ACC_PULSE_OF_RACE dsheet.key[ACC_PULSE_OF_RACE_ID]
-#define ACC_PULSE_OF_TURN dsheet.key[ACC_PULSE_OF_TURN_ID]
-#define ACC_PULSE_OF_TWIST dsheet.key[ACC_PULSE_OF_TWIST_ID]
-#define ACC_PULSE_OF_DEBUG dsheet.key[ACC_PULSE_OF_DEBUG_ID]
+#define ACC_SPEED_OF_RACE dsheet.key[ACC_SPEED_OF_RACE_ID]
+#define ACC_SPEED_OF_TURN dsheet.key[ACC_SPEED_OF_TURN_ID]
+#define ACC_SPEED_OF_TWIST dsheet.key[ACC_SPEED_OF_TWIST_ID]
+#define ACC_SPEED_OF_DEBUG dsheet.key[ACC_SPEED_OF_DEBUG_ID]
 
 #define ACC_TIME_OF_RACE dsheet.key[ACC_TIME_OF_RACE_ID]
 #define ACC_TIME_OF_TURN dsheet.key[ACC_TIME_OF_TURN_ID]

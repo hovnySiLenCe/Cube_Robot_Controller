@@ -125,10 +125,11 @@ struct Acc_Array_t {
 
 // 模拟连续时间，步长 dt（秒）；dt 越小，采样越精细
 const double dt = 0.0001;
-bool generateSCurveStepTimes(Acc_Array_t* acc_p, int pulse_x, double T_mid) // T_mid 单位为ms
+bool generateSCurveStepTimes(Acc_Array_t* acc_p, int speed_x, double T_mid) // T_mid 单位为ms
 {
-    Serial.printf("[INFO] Generating accArrays, pulse_x = %d, T_mid = %.2f\n", pulse_x, T_mid);
-    if(*acc_p == Acc_Array_t(pulse_x, T_mid)) return true; // 如果数据相同，则不重新计算
+    Serial.printf("[INFO] Generating accArrays, pulse_x = %d sps, T_mid = %d ms\n", speed_x, T_mid);
+    if(*acc_p == Acc_Array_t(speed_x, T_mid)) return true; // 如果数据相同，则不重新计算
+    int pulse_x = (int)(speed_x * T_mid / 1000.0); // 计算脉冲数
     double v_max = 2 * pulse_x / T_mid;
     double t = 0.0, lastT = 0.0;
     double lastStepPos = 0.0, pos;
@@ -158,10 +159,10 @@ bool generateSCurveStepTimes(Acc_Array_t* acc_p, int pulse_x, double T_mid) // T
 bool reGenerateSCurveStepTimes() {
     Serial.println("[INFO] Regenerating accArrays");
     bool isSame = true;
-    isSame &= generateSCurveStepTimes(&accArrays[RACE_ID], ACC_PULSE_OF_RACE, ACC_TIME_OF_RACE);
-    isSame &= generateSCurveStepTimes(&accArrays[TURN_ID], ACC_PULSE_OF_TURN, ACC_TIME_OF_TURN);
-    isSame &= generateSCurveStepTimes(&accArrays[TWIST_ID], ACC_PULSE_OF_TWIST, ACC_TIME_OF_TWIST);
-    isSame &= generateSCurveStepTimes(&accArrays[DEBUG_ID], ACC_PULSE_OF_DEBUG, ACC_TIME_OF_DEBUG);
+    isSame &= generateSCurveStepTimes(&accArrays[RACE_ID], ACC_SPEED_OF_RACE, ACC_TIME_OF_RACE);
+    isSame &= generateSCurveStepTimes(&accArrays[TURN_ID], ACC_SPEED_OF_TURN, ACC_TIME_OF_TURN);
+    isSame &= generateSCurveStepTimes(&accArrays[TWIST_ID], ACC_SPEED_OF_TWIST, ACC_TIME_OF_TWIST);
+    isSame &= generateSCurveStepTimes(&accArrays[DEBUG_ID], ACC_SPEED_OF_DEBUG, ACC_TIME_OF_DEBUG);
     return isSame;
 }
 

@@ -27,13 +27,13 @@
 // -----------------------------
 
 #define ACC_TIME_OF_RACE_ID 2*10+0
-#define ACC_PULSE_OF_RACE_ID 2*10+1
+#define ACC_SPEED_OF_RACE_ID 2*10+1
 #define ACC_TIME_OF_TURN_ID 2*10+2
-#define ACC_PULSE_OF_TURN_ID 2*10+3
+#define ACC_SPEED_OF_TURN_ID 2*10+3
 #define ACC_TIME_OF_TWIST_ID 2*10+4
-#define ACC_PULSE_OF_TWIST_ID 2*10+5
+#define ACC_SPEED_OF_TWIST_ID 2*10+5
 #define ACC_TIME_OF_DEBUG_ID 2*10+6
-#define ACC_PULSE_OF_DEBUG_ID 2*10+7
+#define ACC_SPEED_OF_DEBUG_ID 2*10+7
 
 #define MAX_KEY_NUM 30
 
@@ -75,13 +75,13 @@ struct Data_Sheet_t {
 
     // S型曲线加速度步数
     key[ACC_TIME_OF_RACE_ID] = 10;
-    key[ACC_PULSE_OF_RACE_ID] = 50;
+    key[ACC_SPEED_OF_RACE_ID] = 50;
     key[ACC_TIME_OF_TURN_ID] = 40;
-    key[ACC_PULSE_OF_TURN_ID] = 75;
+    key[ACC_SPEED_OF_TURN_ID] = 75;
     key[ACC_TIME_OF_TWIST_ID] = 10;
-    key[ACC_PULSE_OF_TWIST_ID] = 50;
+    key[ACC_SPEED_OF_TWIST_ID] = 50;
     key[ACC_TIME_OF_DEBUG_ID] = 30;
-    key[ACC_PULSE_OF_DEBUG_ID] = 50;
+    key[ACC_SPEED_OF_DEBUG_ID] = 50;
     }
 };
 
