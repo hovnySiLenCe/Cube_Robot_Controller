@@ -74,14 +74,14 @@ struct Data_Sheet_t {
     key[DELTA_PULSE_ID] = 1;  // 轻微转动的脉冲数
 
     // S型曲线加速度步数
-    key[ACC_TIME_OF_RACE_ID] = 10;
-    key[ACC_SPEED_OF_RACE_ID] = 50;
-    key[ACC_TIME_OF_TURN_ID] = 40;
-    key[ACC_SPEED_OF_TURN_ID] = 75;
+    key[ACC_TIME_OF_RACE_ID] = 5;
+    key[ACC_SPEED_OF_RACE_ID] = 5000;
+    key[ACC_TIME_OF_TURN_ID] = 15;
+    key[ACC_SPEED_OF_TURN_ID] = 200;
     key[ACC_TIME_OF_TWIST_ID] = 10;
-    key[ACC_SPEED_OF_TWIST_ID] = 50;
+    key[ACC_SPEED_OF_TWIST_ID] = 3000;
     key[ACC_TIME_OF_DEBUG_ID] = 30;
-    key[ACC_SPEED_OF_DEBUG_ID] = 50;
+    key[ACC_SPEED_OF_DEBUG_ID] = 5000;
     }
 };
 

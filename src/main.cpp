@@ -13,6 +13,7 @@
 QueueHandle_t instructions;
 TaskHandle_t reader;
 TaskHandle_t executant;
+TaskHandle_t systemReset;
 void Robot_Monitor_t:: HandConvert() {
     delay(100);
     if (!digitalRead(BUTTOM_HAND_PIN))
@@ -53,7 +54,7 @@ void setup() {
 	}
 	xTaskCreatePinnedToCore(Serial_Reader, "Serial_Reader", 10000, NULL, 3, &reader, 0);
 	delay(500);
-	xTaskCreatePinnedToCore(Instruction_Executant, "Instruction_Executant", 10000, NULL, 3, &executant, 1);
+	xTaskCreatePinnedToCore(Instruction_Executant, "Instruction_Executant", 10000, NULL, 2, &executant, 1);
     delay(500);
 
     Stepper_Position_Init();
@@ -63,6 +64,12 @@ void setup() {
 void loop() {
   // 主循环代码，重复执行
 }
+
+void task_System_Reset(void *pvParameters) {
+    bool isFromPC = (bool) pvParameters;
+    System_Reset(isFromPC);
+}
+
 void Serial_Reader(void *pvParameters) {
     char c;
     int strcur = 0;
@@ -91,7 +98,11 @@ void Serial_Reader(void *pvParameters) {
 
         if (!digitalRead(BUTTOM_START_PIN)) System_Start(); // 检查开始按钮是否按下
         if (!digitalRead(BUTTOM_RELAX_PIN)) System_Relax(false); // 检查放松按钮是否按下
-        if (!digitalRead(BUTTOM_RESET_PIN)) System_Reset(false); // 检查重置按钮
+        if (!digitalRead(BUTTOM_RESET_PIN)) {
+            Serial.printf("start function call: %d\n", millis());
+            xTaskCreatePinnedToCore(task_System_Reset, "System_Reset", 10000, (void*)false, 2, &systemReset, 0); // 检查重置按钮
+            vTaskResume(systemReset);
+        }
         if (!digitalRead(BUTTOM_HAND_PIN)) robot.HandConvert(); // 检查手爪开合按钮
 
         // if (!digitalRead(BtnRed)) Emergency_Stop();  // 检查紧急停止按钮
@@ -196,30 +207,31 @@ void System_Relax(bool isFromPC)
 
 // 系统复原
 void System_Reset(bool isFromPC) {
-    delay(10);
+    vTaskDelay(10);
+    Serial.printf("begin of system reset: %d\n", millis());
     if (!digitalRead(BUTTOM_RESET_PIN) || isFromPC) {
         Serial.println("#Reset");
         HAND_ALL_LOOSE();
         STEPPER_ALL_ON();
-        vTaskDelay(100);
+        //vTaskDelay(50);
         robot.isDebug = true;
+        Serial.printf("start rotate angle: %d\n", millis());
         if (robot.l.degree % 180 != 0) {
             digitalWrite(STEPPER_L_DIR, (robot.l.degree > 0 ? ACW : CW));
             Pulse_Sender(STEPPER_L_PUL, round(PULSE360 * abs(robot.l.degree) / 360.0));
-            vTaskDelay(500);
+            vTaskDelay(100);
             digitalWrite(STEPPER_R_DIR, (robot.r.degree > 0 ? ACW : CW));
             Pulse_Sender(STEPPER_R_PUL, round(PULSE360 * abs(robot.r.degree) / 360.0));
         }
         else {
             digitalWrite(STEPPER_R_DIR, (robot.r.degree > 0 ? ACW : CW));
             Pulse_Sender(STEPPER_R_PUL, round(PULSE360 * abs(robot.r.degree) / 360.0));
-            vTaskDelay(500);
+            vTaskDelay(100);
             digitalWrite(STEPPER_L_DIR, (robot.l.degree > 0 ? ACW : CW));
             Pulse_Sender(STEPPER_L_PUL, round(PULSE360 * abs(robot.l.degree) / 360.0));
         }
-
         vTaskDelay(5);
-
+        Serial.printf("start init position: %d\n", millis());
         robot.Init();
         Stepper_Position_Init();
 
