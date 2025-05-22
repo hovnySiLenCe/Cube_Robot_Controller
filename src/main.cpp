@@ -60,8 +60,27 @@ void setup() {
 	Serial.println("---------- Successfully Initialized ----------");
 }
 
+volatile int pressedButtomId = -1;
+enum {
+    BUTTOM_RELAX_ID,
+    BUTTOM_RESET_ID,
+    BUTTOM_START_ID,
+    BUTTOM_HAND_ID
+};
+
 void loop() {
-  // 主循环代码，重复执行
+    // 主循环代码，重复执行
+    switch ( pressedButtomId )
+    {
+    case BUTTOM_RELAX_ID:
+        System_Relax();
+        pressedButtomId = -1;
+        /* code */
+        break;
+
+    default:
+        break;
+    }
 }
 void Serial_Reader(void *pvParameters) {
     char c;
@@ -76,7 +95,7 @@ void Serial_Reader(void *pvParameters) {
                 //Serial.printf("received: %s\n", tmpstr);
                 switch (tmpstr[1]) {
                 case '8':
-                    System_Relax(true); // 系统放松
+                    System_Relax(); // 系统放松
                     break;
                 case '9':
                     System_Reset(true); // 系统复原
@@ -90,7 +109,7 @@ void Serial_Reader(void *pvParameters) {
         }
 
         if (!digitalRead(BUTTOM_START_PIN)) System_Start(); // 检查开始按钮是否按下
-        if (!digitalRead(BUTTOM_RELAX_PIN)) System_Relax(false); // 检查放松按钮是否按下
+        //if (!digitalRead(BUTTOM_RELAX_PIN)) System_Relax(); // 检查放松按钮是否按下
         if (!digitalRead(BUTTOM_RESET_PIN)) System_Reset(false); // 检查重置按钮
         if (!digitalRead(BUTTOM_HAND_PIN)) robot.HandConvert(); // 检查手爪开合按钮
 
@@ -177,21 +196,16 @@ void System_Start()
 }
 
 // 系统放松
-void System_Relax(bool isFromPC)
+void System_Relax()
 {
-    delay(10);
-    if (!digitalRead(BUTTOM_RELAX_PIN) || isFromPC)
-    {
-        STEPPER_ALL_OFF();
-        HAND_ALL_LOOSE();
-        robot.isReady = false;
-        Serial.println("#Relax");
-        while (true)
-        {
-            if (digitalRead(BUTTOM_RELAX_PIN) || isFromPC)
-                break;
-        }
-    }
+    STEPPER_ALL_OFF();
+    HAND_ALL_LOOSE();
+    robot.isReady = false;
+    Serial.println("#Relax");
+}
+// Create an interrupt service routine function
+void System_Relax_ISR() {
+    pressedButtomId = BUTTOM_RELAX_ID;
 }
 
 // 系统复原
@@ -267,6 +281,12 @@ void Pin_Mode_Init() {
     pinMode(BUTTOM_RESET_PIN, INPUT_PULLUP);
 	pinMode(BUTTOM_RELAX_PIN, INPUT_PULLUP);
     pinMode(BUTTOM_HAND_PIN, INPUT_PULLUP);
+
+    attachInterrupt(
+        digitalPinToInterrupt(BUTTOM_RELAX_PIN),
+        System_Relax_ISR,
+        FALLING // 下降沿触发（按钮按下时从高→低）
+    );
 
     // 初始化霍尔传感器引脚
 	pinMode(SENSOR_L_PIN, INPUT_PULLDOWN);
