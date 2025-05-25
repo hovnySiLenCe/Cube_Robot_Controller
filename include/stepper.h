@@ -20,7 +20,7 @@
         delayMicroseconds(delta_time);\
     } while(0)
 
-#define MAX_STEPS 203
+#define MAX_STEPS 303
 
 #define CW LOW
 #define ACW HIGH
