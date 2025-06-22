@@ -30,12 +30,25 @@ void Robot_Monitor_t:: HandConvert() {
 }
 
 Robot_Monitor_t robot;
+
+void PWM_Sender(int pin, int time) {
+    // 发送一个PWM脉冲
+    pinMode(pin, OUTPUT);
+    while(1) {
+        digitalWrite(pin, HIGH);
+        delay(time); // 脉宽可根据实际需求调整
+        digitalWrite(pin, LOW);
+        delay(time);
+    }
+    
+}
 void setup() {
     esp_log_level_set("*", ESP_LOG_NONE);
     esp_task_wdt_init(30, false);
     //esp_log_level_set("esp_system", ESP_LOG_NONE);
     // 初始化引脚
 	Pin_Mode_Init();
+    //PWM_Sender(12, 80); // 初始化蜂鸣器
     HAND_ALL_LOOSE(); // 松开所有电磁铁
     STEPPER_ALL_ON(); // 使能电机
     // 初始化蜂鸣器
