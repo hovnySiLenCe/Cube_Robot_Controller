@@ -218,6 +218,8 @@ void System_Relax()
 }
 // Create an interrupt service routine function
 void System_Relax_ISR() {
+    delay(10);
+    if(digitalRead(BUTTOM_RELAX_PIN)) return; // 如果按钮未按下则返回
     pressedButtomId = BUTTOM_RELAX_ID;
 }
 
