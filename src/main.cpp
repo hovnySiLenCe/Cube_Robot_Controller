@@ -218,8 +218,10 @@ void System_Relax()
 }
 // Create an interrupt service routine function
 void System_Relax_ISR() {
-    delay(10);
+    //vTaskDelay(10);
+    //Serial.println("#Relax_ISR");
     if(digitalRead(BUTTOM_RELAX_PIN)) return; // 如果按钮未按下则返回
+    //Serial.println("Buttom Pressed");
     pressedButtomId = BUTTOM_RELAX_ID;
 }
 
