@@ -5,12 +5,15 @@
 #include "stepper.h"
 
 // -------------------------------
-#define MAGNET_TIGHT_DELAY_ID 0*10+0
-#define MAGNET_LOOSE_DELAY_ID 0*10+1
+#define MAGNET_TIGHT_PRE_DELAY_ID 0*10+0
+#define MAGNET_TIGHT_DELAY_ID 0*10+1
 
-#define CONTINUOUS_TWIST_DELAY_ID 0*10+2
-#define STEPPER_REVERSE_DELAY_ID 0*10+3
-#define STEPPER_DEBUG_DELAY_ID 0*10+4
+#define MAGNET_LOOSE_PRE_DELAY_ID 0*10+2
+#define MAGNET_LOOSE_DELAY_ID 0*10+3
+
+#define CONTINUOUS_TWIST_DELAY_ID 0*10+4
+#define STEPPER_REVERSE_DELAY_ID 0*10+5
+#define STEPPER_DEBUG_DELAY_ID 0*10+6
 
 #define MAGNET_TIGHT_RATIO_DELAY_ID 0*10+5
 #define MAGNET_LOOSE_RATIO_DELAY_ID 0*10+6
@@ -52,7 +55,9 @@ struct Data_Sheet_t {
         }
     }
     Data_Sheet_t() {
+    key[MAGNET_TIGHT_PRE_DELAY_ID] = 10; // 单位ms
     key[MAGNET_TIGHT_DELAY_ID] = 50; // 单位ms
+    key[MAGNET_LOOSE_PRE_DELAY_ID] = 10;
     key[MAGNET_LOOSE_DELAY_ID] = 111;
 
     key[MAGNET_TIGHT_RATIO_DELAY_ID] = 5; // 单位ms

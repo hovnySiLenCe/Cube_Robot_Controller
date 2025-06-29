@@ -41,6 +41,9 @@
 #define Magnet_Tight_Delay dsheet.key[MAGNET_TIGHT_DELAY_ID] // 单位ms
 #define Magnet_Loose_Delay dsheet.key[MAGNET_LOOSE_DELAY_ID]
 
+#define Magnet_Tight_Pre_Delay dsheet.key[MAGNET_TIGHT_PRE_DELAY_ID] // 单位ms
+#define Magnet_Loose_Pre_Delay dsheet.key[MAGNET_LOOSE_PRE_DELAY_ID]
+
 #define Magnet_Tight_Ratio_Delay dsheet.key[MAGNET_TIGHT_RATIO_DELAY_ID] // 单位ms
 #define Magnet_Loose_Ratio_Delay dsheet.key[MAGNET_LOOSE_RATIO_DELAY_ID]
 
@@ -107,7 +110,9 @@ private:
 public:
     Hand_State_t l;
     Hand_State_t r;
-    bool isReady, isDebug, preTwist, curTwist;
+    bool isReady, isDebug;
+    bool preTwist, curTwist, preRun;
+
     Robot_Monitor_t() {};
     ~Robot_Monitor_t() {}
     void Init() {
@@ -117,6 +122,7 @@ public:
         preTwist = curTwist = false;
     }
     void HandConvert();
+    void Iteration(int device_id);
 };
 
 extern Robot_Monitor_t robot;

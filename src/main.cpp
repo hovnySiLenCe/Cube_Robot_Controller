@@ -29,6 +29,11 @@ void Robot_Monitor_t:: HandConvert() {
     }
 }
 
+void Robot_Monitor_t::Iteration(int device_id) {
+    preTwist = curTwist;
+    preRun = (!l.isTight && device_id == 1) || (!r.isTight && device_id == 3);
+}
+
 Robot_Monitor_t robot;
 
 void PWM_Sender(int pin, int time) {
@@ -185,7 +190,8 @@ void Instruction_Executant(void *pvParameters) {
                 break;
                 default: break;
             }
-            robot.preTwist = robot.curTwist;
+            robot.Iteration(device_id - '0'); // 更新机器人状态
+            //robot.preTwist = robot.curTwist;
         }
         } else delay(100);
     }
