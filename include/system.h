@@ -18,7 +18,7 @@
 #define STEPPER_R_ALM 4  // 右电机报警引脚
 
 // 电磁铁引脚
-#define MAGNET_L_PIN 12
+#define MAGNET_L_PIN 10
 #define MAGNET_R_PIN 11
 
 // 按钮引脚
