@@ -175,9 +175,10 @@ void Instruction_Executant(void *pvParameters) {
                     Hand_Control(device_id-'0', operation-'0'); // 控制电磁铁开合
                 break;
                 case '0': case '7':
-                    Serial.printf("totaol time: %d\n", (int)(clock() - st));
+                    //Serial.printf("totaol time: %d\n", (int)(clock() - st));
                     Serial.println("#Over");
-                case '9':
+                break;
+                case '5':
                     st = clock();
                 break;
                 case 'R':
