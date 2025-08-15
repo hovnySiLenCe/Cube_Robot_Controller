@@ -150,6 +150,7 @@ int String2Int(char *str) {
 void Instruction_Executant(void *pvParameters) {
     char ins[8], device_id, operation;
     int value;
+    int st, ed;
     while (true) {
         if (xQueueIsQueueEmptyFromISR(instructions) == pdFALSE) {
         xQueueReceive(instructions, ins, 100);
@@ -174,7 +175,10 @@ void Instruction_Executant(void *pvParameters) {
                     Hand_Control(device_id-'0', operation-'0'); // 控制电磁铁开合
                 break;
                 case '0': case '7':
+                    Serial.printf("totaol time: %d\n", (int)(clock() - st));
                     Serial.println("#Over");
+                case '9':
+                    st = clock();
                 break;
                 case 'R':
                     Serial.println("Date_Sheet_Read");
