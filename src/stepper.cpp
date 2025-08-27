@@ -52,6 +52,12 @@ void Stepper_Control(int id, int op) {
         Pulse_Sender(pin_pul, PULSE180);
         *degree += (*degree > 0 ? -180 : 180);
         break;
+    case 9:
+        Serial.println((*degree > 0 ? -90 : 90));
+        digitalWrite(pin_dir, (*degree > 0 ? ACW : CW));
+        Pulse_Sender(pin_pul, PULSE90);
+        *degree += (*degree > 0 ? -90 : 90);
+        break;
     default:
         Serial.println(" Invalid Command");
         return;
