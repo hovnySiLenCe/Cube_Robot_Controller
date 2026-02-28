@@ -38,20 +38,18 @@
 
 // ----------- 延时设置 -----------
 
-#define Magnet_Tight_Delay dsheet.key[MAGNET_TIGHT_DELAY_ID] // 单位ms
-#define Magnet_Loose_Delay dsheet.key[MAGNET_LOOSE_DELAY_ID]
+#define Magnet_Tight_Delay dsheet.key[MAGNET_TIGHT_DELAY_ID] * speedFactor // 单位ms
+#define Magnet_Loose_Delay dsheet.key[MAGNET_LOOSE_DELAY_ID] * speedFactor
 
-#define Magnet_Tight_Pre_Delay dsheet.key[MAGNET_TIGHT_PRE_DELAY_ID] // 单位ms
-#define Magnet_Loose_Pre_Delay dsheet.key[MAGNET_LOOSE_PRE_DELAY_ID]
+#define Magnet_Tight_Pre_Delay dsheet.key[MAGNET_TIGHT_PRE_DELAY_ID] * speedFactor // 单位ms
+#define Magnet_Loose_Pre_Delay dsheet.key[MAGNET_LOOSE_PRE_DELAY_ID] * speedFactor
+#define Magnet_Tight_Ratio_Delay dsheet.key[MAGNET_TIGHT_RATIO_DELAY_ID] * speedFactor // 单位ms
+#define Magnet_Loose_Ratio_Delay dsheet.key[MAGNET_LOOSE_RATIO_DELAY_ID] * speedFactor
 
-#define Magnet_Tight_Ratio_Delay dsheet.key[MAGNET_TIGHT_RATIO_DELAY_ID] // 单位ms
-#define Magnet_Loose_Ratio_Delay dsheet.key[MAGNET_LOOSE_RATIO_DELAY_ID]
-
-#define Magnet_Delta_Delay dsheet.key[MAGNET_DELTA_DELAY_ID]
-#define Continous_Twist_Delay dsheet.key[CONTINUOUS_TWIST_DELAY_ID] // 连续拧动的延迟，单位ms
-
-#define STEPPER_REVERSE_DELAY dsheet.key[STEPPER_REVERSE_DELAY_ID] // 初始位置延迟，单位us
-#define STEPPER_DEBUG_DELAY dsheet.key[STEPPER_DEBUG_DELAY_ID] // 轻微延迟，单位us
+#define Magnet_Delta_Delay dsheet.key[MAGNET_DELTA_DELAY_ID] * speedFactor
+#define Continous_Twist_Delay dsheet.key[CONTINUOUS_TWIST_DELAY_ID] * speedFactor // 连续拧动的延迟，单位ms
+#define STEPPER_REVERSE_DELAY dsheet.key[STEPPER_REVERSE_DELAY_ID] * speedFactor // 初始位置延迟，单位us
+#define STEPPER_DEBUG_DELAY dsheet.key[STEPPER_DEBUG_DELAY_ID] * speedFactor // 轻微延迟，单位us
 
 // ----------- 脉冲数设置 -----------
 // 补偿脉冲
@@ -126,5 +124,6 @@ public:
 };
 
 extern Robot_Monitor_t robot;
+extern float speedFactor;
 
 #endif

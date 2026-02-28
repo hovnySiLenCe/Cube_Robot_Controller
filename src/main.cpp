@@ -2,8 +2,8 @@
 #include <Preferences.h>
 
 /* 作者: LiBingle
- * 第二作者: Joshua
- * 第三作者：陇望遥
+ * 第二作者: 陇望遥
+ * 第三作者：Joshua
  * 版本: 2.0 fastest
  * 说明: 本程序为魔方机器人控制程序，通过串口接收指令控制电机和阀门的动作
  * 详细说明见代码注释
@@ -13,6 +13,9 @@
 QueueHandle_t instructions;
 TaskHandle_t reader;
 TaskHandle_t executant;
+
+const float speedFactorRange = 30.0; // 速度调节因子范围
+float speedFactor = 1.0; // 当前速度调节因子
 void Robot_Monitor_t:: HandConvert() {
     delay(100);
     if (!digitalRead(BUTTOM_HAND_PIN))
@@ -69,10 +72,12 @@ void setup() {
 	if (instructions == NULL) {
 		Serial.println("[FATAL] failed to create queue");
 	}
-	xTaskCreatePinnedToCore(Serial_Reader, "Serial_Reader", 10000, NULL, 3, &reader, 0);
-	delay(500);
-	xTaskCreatePinnedToCore(Instruction_Executant, "Instruction_Executant", 10000, NULL, 3, &executant, 1);
-    delay(500);
+	xTaskCreatePinnedToCore(Serial_Reader, "Serial_Reader", 
+        10000, NULL, 3, &reader, 0);
+	vTaskDelay(500);
+	xTaskCreatePinnedToCore(Instruction_Executant, "Instruction_Executant", 
+        10000, NULL, 3, &executant, 1);
+    vTaskDelay(500);
 
     Stepper_Position_Init();
 	Serial.println("---------- Successfully Initialized ----------");
@@ -192,6 +197,10 @@ void Instruction_Executant(void *pvParameters) {
                 case 'E':
                     Serial.println("Date_Sheet_Save");
                     Data_Sheet_Save();
+                break;
+                case 'F':
+                    speedFactor = speedFactorRange * (101 - String2Int(ins + 2)) / 100.0;
+                    Serial.printf("Speed Factor: %f\n", speedFactor);
                 break;
                 default: break;
             }

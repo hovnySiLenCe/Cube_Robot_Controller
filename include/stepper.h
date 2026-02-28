@@ -15,9 +15,9 @@
 #define PULSE_GENERATOR(pin, delta_time) \
     do{\
         digitalWrite(pin, HIGH);\
-        delayMicroseconds(delta_time);\
+        delayMicroseconds(delta_time*speedFactor);\
         digitalWrite(pin, LOW);\
-        delayMicroseconds(delta_time);\
+        delayMicroseconds(delta_time*speedFactor);\
     } while(0)
 
 #define MAX_STEPS 303
