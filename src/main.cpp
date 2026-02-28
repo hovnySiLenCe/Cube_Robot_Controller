@@ -181,6 +181,7 @@ void Instruction_Executant(void *pvParameters) {
                 break;
                 case '0': case '7':
                     //Serial.printf("totaol time: %d\n", (int)(clock() - st));
+                    if (robot.r.degree % 180) Stepper_Control(3, 7); // 结束后将手回复水平
                     Serial.println("#Over");
                 break;
                 case '5':
