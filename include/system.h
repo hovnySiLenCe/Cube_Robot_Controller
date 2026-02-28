@@ -48,7 +48,7 @@
 
 #define Magnet_Delta_Delay dsheet.key[MAGNET_DELTA_DELAY_ID] * speedFactor
 #define Continous_Twist_Delay dsheet.key[CONTINUOUS_TWIST_DELAY_ID] * speedFactor // 连续拧动的延迟，单位ms
-#define STEPPER_REVERSE_DELAY dsheet.key[STEPPER_REVERSE_DELAY_ID] * speedFactor // 初始位置延迟，单位us
+#define STEPPER_REVERSE_DELAY dsheet.key[STEPPER_REVERSE_DELAY_ID] // 初始位置延迟，单位us
 #define STEPPER_DEBUG_DELAY dsheet.key[STEPPER_DEBUG_DELAY_ID] * speedFactor // 轻微延迟，单位us
 
 // ----------- 脉冲数设置 -----------

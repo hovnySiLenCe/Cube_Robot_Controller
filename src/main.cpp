@@ -14,7 +14,7 @@ QueueHandle_t instructions;
 TaskHandle_t reader;
 TaskHandle_t executant;
 
-const float speedFactorRange = 30.0; // 速度调节因子范围
+const float speedFactorRange = 10.0; // 速度调节因子范围
 float speedFactor = 1.0; // 当前速度调节因子
 void Robot_Monitor_t:: HandConvert() {
     delay(100);
@@ -200,7 +200,7 @@ void Instruction_Executant(void *pvParameters) {
                     Data_Sheet_Save();
                 break;
                 case 'F':
-                    speedFactor = speedFactorRange * (101 - String2Int(ins + 2)) / 100.0;
+                    speedFactor = 1 + speedFactorRange * (100 - String2Int(ins + 2)) / 100.0;
                     Serial.printf("Speed Factor: %f\n", speedFactor);
                 break;
                 default: break;
