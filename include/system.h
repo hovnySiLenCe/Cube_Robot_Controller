@@ -19,7 +19,7 @@
 
 // 电磁铁引脚
 #define MAGNET_L_PIN 10
-#define MAGNET_R_PIN 11
+#define MAGNET_R_PIN 9
 
 // 按钮引脚
 #define BUTTOM_START_PIN 21
